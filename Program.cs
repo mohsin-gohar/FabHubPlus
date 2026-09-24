@@ -61,9 +61,6 @@ builder.Services.AddScoped<DbSeeder>();
 
 var app = builder.Build();
 
-
-var app = builder.Build();
-
 // ---------- Seed the database (safe to run every time) ----------
 using (var scope = app.Services.CreateScope())
 {

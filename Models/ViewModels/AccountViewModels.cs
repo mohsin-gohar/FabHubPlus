@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FanHubPlus.Models.Entities;
 using Microsoft.AspNetCore.Http;
 
 namespace FanHubPlus.Models.ViewModels;

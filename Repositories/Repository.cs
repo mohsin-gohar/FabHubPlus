@@ -23,6 +23,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 
     public async Task<List<TEntity>> ListAsync() => await _set.ToListAsync();
 
+    public void Add(TEntity entity) => _set.Add(entity);
+
     public async Task AddAsync(TEntity entity) => await _set.AddAsync(entity);
 
     public void Update(TEntity entity) => _set.Update(entity);   // full update of a detached graph

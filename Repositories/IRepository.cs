@@ -11,6 +11,7 @@ public interface IRepository<TEntity> where TEntity : class
 
     Task<TEntity?> GetByIdAsync(object id);
     Task<List<TEntity>> ListAsync();
+    void Add(TEntity entity);          // sync add (SaveChanges called separately)
     Task AddAsync(TEntity entity);
     void Update(TEntity entity);
     void Remove(TEntity entity);

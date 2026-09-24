@@ -5,6 +5,7 @@ using FanHubPlus.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FanHubPlus.Controllers;
 
@@ -180,4 +181,119 @@ public class AccountController : Controller
         TempData["StatusMessage"] = "Password updated – you can log in now.";
         return RedirectToAction(nameof(Login));
     }
+
+    // ================= PROFILE (name, avatar, theme, favourites) =================
+    [HttpGet, Authorize]
+    public async Task<IActionResult> Profile()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return RedirectToAction(nameof(Login));
+
+        var favoriteIds = await _userCategories.Query()
+            .Where(uc => uc.UserId == user.Id)
+            .Select(uc => uc.CategoryId)
+            .ToListAsync();
+
+        var vm = new ProfileViewModel
+        {
+            Name = user.Name,
+            CurrentAvatarUrl = user.AvatarUrl,
+            DarkMode = user.DarkMode,
+            FontSize = user.FontSize,
+            FavoriteCategoryIds = favoriteIds,
+            AllCategories = await _categories.Query().OrderBy(c => c.Name).ToListAsync()
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost, Authorize, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Profile(ProfileViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return RedirectToAction(nameof(Login));
+
+        if (!ModelState.IsValid)
+        {
+            model.AllCategories = await _categories.Query().OrderBy(c => c.Name).ToListAsync();
+            return View(model);
+        }
+
+        user.Name = model.Name;
+        user.DarkMode = model.DarkMode;
+        user.FontSize = Math.Clamp(model.FontSize, 14, 22);
+
+        if (model.AvatarFile is { Length: > 0 })
+        {
+            try
+            {
+                var path = await _uploads.SaveImageAsync(model.AvatarFile, "avatars");
+                _uploads.DeleteImage(user.AvatarUrl); // remove the old file first
+                user.AvatarUrl = path;
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(nameof(model.AvatarFile), ex.Message);
+                model.AllCategories = await _categories.Query().OrderBy(c => c.Name).ToListAsync();
+                return View(model);
+            }
+        }
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            foreach (var e in result.Errors) ModelState.AddModelError(string.Empty, e.Description);
+            model.AllCategories = await _categories.Query().OrderBy(c => c.Name).ToListAsync();
+            return View(model);
+        }
+
+        // ---- Sync favourite categories (many-to-many UserCategory) ----
+        var current = await _userCategories.Query()
+            .Where(uc => uc.UserId == user.Id)
+            .ToListAsync();
+
+        foreach (var stale in current.Where(c => !model.FavoriteCategoryIds.Contains(c.CategoryId)))
+            _userCategories.Remove(stale);
+
+        foreach (var id in model.FavoriteCategoryIds)
+            if (current.All(c => c.CategoryId != id))
+                await _userCategories.AddAsync(new UserCategory { UserId = user.Id, CategoryId = id });
+
+        await _userCategories.SaveChangesAsync();
+
+        SavePreferenceCookie(user.DarkMode, user.FontSize); // sync rendered theme instantly
+        TempData["StatusMessage"] = "Profile updated.";
+        return RedirectToAction(nameof(Profile));
+    }
+
+    // ================= CHANGE PASSWORD =================
+    [HttpPost, Authorize, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return RedirectToAction(nameof(Profile));
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return RedirectToAction(nameof(Login));
+
+        var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+        if (result.Succeeded)
+        {
+            await _signInManager.RefreshSignInAsync(user); // keep the cookie valid after password change
+            TempData["StatusMessage"] = "Password changed successfully.";
+        }
+        else
+        {
+            TempData["PasswordError"] = string.Join(" ", result.Errors.Select(e => e.Description));
+        }
+        return RedirectToAction(nameof(Profile));
+    }
+
+    // ---- Stores dark-mode + font-size so the layout can render them without a DB hit ----
+    private void SavePreferenceCookie(bool darkMode, int fontSize)
+    {
+        Response.Cookies.Append("fhp_pref", $"{(darkMode ? 1 : 0)}|{fontSize}",
+            new CookieOptions { HttpOnly = false, Expires = DateTimeOffset.UtcNow.AddYears(1) });
+    }
+}
+
 

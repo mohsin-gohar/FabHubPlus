@@ -1,6 +1,7 @@
 using FanHubPlus.Models.Entities;
 using FanHubPlus.Models.Enums;
 using FanHubPlus.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace FanHubPlus.Services;
 

@@ -1,0 +1,55 @@
+@model ArticleDetailViewModel
+@{
+    ViewData["Title"] = Model.Article.Title;
+    var a = Model.Article;
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"News & Timeline\", \"/News\"), new(a.Title) }" />
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <article class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                    <span class="badge bg-primary rounded-pill">@a.Category.Name @(a.IsTimeline ? "· 🕰 Timeline" : "")</span>
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm bookmark-btn @(Model.IsBookmarked ? "active" : "")"
+                            data-type="@((int)BookmarkType.Article)" data-id="@a.ArticleId">
+                        @(Model.IsBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
+                    </button>
+                </div>
+
+                <h1 class="page-title mb-2">@a.Title</h1>
+                <div class="text-muted small mb-4">
+                    📅 @a.PublishedAt.ToString("MMMM d, yyyy")
+                    @(a.Author is not null ? " · ✍ " + a.Author.Name : "")
+                </div>
+
+                @* Admin-authored HTML is trusted (only admins can write articles) *@
+                <div class="article-body">
+                    @Html.Raw(a.Body)
+                </div>
+            </div>
+        </article>
+
+        <a asp-action="Index" class="btn btn-outline-secondary mt-3">← Back to news</a>
+    </div>
+
+    <div class="col-lg-4">
+        <h2 class="section-title h6 mb-3">Related articles</h2>
+        <div class="list-group shadow-sm">
+            @foreach (var r in Model.Related)
+            {
+                <a asp-action="Details" asp-route-id="@r.ArticleId"
+                   class="list-group-item list-group-item-action">
+                    <div class="fw-semibold small">@r.Title</div>
+                    <div class="text-muted" style="font-size:.75rem;">@r.PublishedAt.ToString("MMM d, yyyy")</div>
+                </a>
+            }
+            @if (Model.Related.Count == 0)
+            {
+                <div class="list-group-item empty-state py-4">No related articles.</div>
+            }
+        </div>
+    </div>
+</div>

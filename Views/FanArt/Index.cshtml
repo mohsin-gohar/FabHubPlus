@@ -1,0 +1,119 @@
+@model FanArtViewModel
+@{
+    ViewData["Title"] = "Fan Art Gallery";
+    var isAuth = User.Identity?.IsAuthenticated == true;
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Fan Art Gallery\") }" />
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">🎨 Fan art &amp; fan stories</h1>
+    <span class="text-muted small">@Model.Approved.Count published piece(s)</span>
+</div>
+
+<div class="row g-4">
+    @* ---------------- Submit form / my submissions ---------------- *@
+    <div class="col-lg-4 order-lg-2">
+        @if (isAuth)
+        {
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">✏️ Submit your work</h2>
+                    <form asp-action="Submit" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="Form.Title" class="form-label"></label>
+                            <input asp-for="Form.Title" class="form-control" placeholder="Title of your piece" />
+                            <span asp-validation-for="Form.Title" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Form.Body" class="form-label"></label>
+                            <textarea asp-for="Form.Body" class="form-control" rows="5"
+                                      placeholder="Tell the story behind your fan art..."></textarea>
+                            <span asp-validation-for="Form.Body" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Form.ImageFile" class="form-label"></label>
+                            <input asp-for="Form.ImageFile" class="form-control" />
+                            <span asp-validation-for="Form.ImageFile" class="text-danger small"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit for review</button>
+                        <div class="form-text">Submissions are reviewed by an admin before publishing.</div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Model.MySubmissions.Count > 0)
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">📨 My submissions</h2>
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var s in Model.MySubmissions)
+                            {
+                                <li class="mb-2 d-flex justify-content-between align-items-center">
+                                    <span class="small">@s.Title</span>
+                                    <span class="badge rounded-pill @(
+                                        s.Status switch {
+                                            SubmissionStatus.Approved => "bg-success",
+                                            SubmissionStatus.Rejected => "bg-danger",
+                                            _ => "bg-warning text-dark" })">
+                                        @s.Status
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div style="font-size:2.5rem;">✍️</div>
+                    <h2 class="h5">Share your fan art</h2>
+                    <p class="text-muted small">Log in to submit your work for the community gallery.</p>
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/FanArt" class="btn btn-primary">Login to submit</a>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* ---------------- Approved gallery ---------------- *@
+    <div class="col-lg-8 order-lg-1">
+        <div class="row g-3">
+            @foreach (var s in Model.Approved)
+            {
+                <div class="col-md-6">
+                    <div class="card content-card border-0 shadow-sm h-100">
+                        @if (!string.IsNullOrEmpty(s.ImageUrl))
+                        {
+                            <img src="@s.ImageUrl" class="card-img-top" alt="@s.Title" style="height:220px;object-fit:cover;" />
+                        }
+                        <div class="card-body">
+                            <h2 class="h6 card-title mb-1">@s.Title</h2>
+                            <div class="small text-muted mb-2">
+                                👤 @(s.User?.Name ?? "Former member") · 📅 @s.CreatedAt.ToString("MMM d, yyyy")
+                            </div>
+                            <p class="small mb-0" style="white-space:pre-line;">
+                                @(s.Body.Length > 220 ? s.Body[..220] + "…" : s.Body)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (Model.Approved.Count == 0)
+        {
+            <div class="empty-state">
+                <div style="font-size:3rem;">🖼</div>
+                <p>No approved fan art yet — be the first to submit!</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

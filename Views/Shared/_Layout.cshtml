@@ -1,49 +1,177 @@
+@using System.Text.RegularExpressions
+@{
+    // Preferences cookie written by AccountController / site.js: "0|16" = light, 16px
+    var pref = Context.Request.Cookies["fhp_pref"];
+    var dark = pref != null && pref.StartsWith("1");
+    var fontMatch = Regex.Match(pref ?? "", @"\|(\d+)$");
+    var fontPx = fontMatch.Success ? fontMatch.Groups[1].Value : "16";
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.IsInRole("Admin");
+    var userName = User.Identity?.Name ?? "";
+}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="@(dark ? "dark-mode" : null)" style="font-size: @(fontPx)px">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FanHubPlus</title>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " – " : "")Fan Hub Plus</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FanHubPlus.styles.css" asp-append-version="true" />
+    <script>
+        // Guests: apply localStorage preference BEFORE first paint (no theme flash)
+        (function () {
+            if (!document.cookie.includes('fhp_pref')) {
+                var ls = localStorage.getItem('fhp_pref');
+                if (ls) {
+                    var p = ls.split('|');
+                    if (p[0] === '1') document.documentElement.classList.add('dark-mode');
+                    document.documentElement.style.fontSize = (parseInt(p[1] || '16', 10)) + 'px';
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
+    <div id="pageLoader" class="page-loader">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FanHubPlus</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary sticky-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">🎬 Fan Hub <span class="text-primary">Plus</span></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Explore" asp-action="Index">Explore</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Characters" asp-action="Index">Characters</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="News" asp-action="Index">News &amp; Timeline</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Events" asp-action="Index">Events</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Merch" asp-action="Index">Merch</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="FanArt" asp-action="Index">Fan Art</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Support" asp-action="Index">Support</a></li>
                     </ul>
+
+                    <form asp-controller="Explore" asp-action="Index" method="get" class="d-flex me-2 my-1">
+                        <input class="form-control form-control-sm me-1" type="search" name="search" placeholder="Search..." aria-label="Search" />
+                        <button class="btn btn-outline-primary btn-sm" type="submit">Search</button>
+                    </form>
+
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fhpToggleTheme()" title="Toggle dark mode" id="themeToggle">🌙</button>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Font size">
+                            <button type="button" class="btn btn-outline-secondary" onclick="fhpFontStep(-1)" title="Smaller text">A−</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="fhpFontStep(1)" title="Larger text">A+</button>
+                        </div>
+
+                        @if (isAuth)
+                        {
+                            <div class="dropdown ms-1">
+                                <a class="btn btn-outline-primary btn-sm dropdown-toggle" href="#" role="button"
+                                   id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    👤 @(userName.Length > 18 ? userName[..18] + "…" : userName)
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">⚙️ Profile &amp; settings</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Bookmarks" asp-action="Index">♥ My bookmarks</a></li>
+                                    <li><a class="dropdown-item" asp-controller="FanArt" asp-action="Index">🎨 My submissions</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Chatbot" asp-action="Index">🤖 Chat history</a></li>
+                                    @if (isAdmin)
+                                    {
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item fw-bold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">🛠 Admin dashboard</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                            <button type="submit" class="dropdown-item">🚪 Sign out</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-primary btn-sm ms-1" asp-controller="Account" asp-action="Login">Login</a>
+                            <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Register</a>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <main role="main" class="py-3 flex-grow-1">
         <div class="container">
-            &copy; 2026 - FanHubPlus - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <partial name="_Alerts" />
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer border-top py-4 mt-4">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="fw-bold mb-2">🎬 Fan Hub Plus</div>
+                    <p class="small text-muted mb-2">
+                        The universal fandom portal: explore content, follow characters, track events,
+                        share fan art and connect with your community.
+                    </p>
+                    <div class="small text-muted">🌐 <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> ·
+                        <a href="https://x.com" target="_blank" rel="noopener">X</a> ·
+                        <a href="https://youtube.com" target="_blank" rel="noopener">YouTube</a></div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="fw-semibold mb-2">Explore</div>
+                    <ul class="list-unstyled small footer mb-0">
+                        <li class="mb-1"><a asp-controller="Explore" asp-action="Index">All content</a></li>
+                        <li class="mb-1"><a asp-controller="Characters" asp-action="Index">Characters</a></li>
+                        <li class="mb-1"><a asp-controller="News" asp-action="Index">News</a></li>
+                        <li class="mb-1"><a asp-controller="News" asp-action="Index" asp-route-timeline="true">Timeline</a></li>
+                        <li class="mb-1"><a asp-controller="Events" asp-action="Index">Events map</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="fw-semibold mb-2">Community</div>
+                    <ul class="list-unstyled small footer mb-0">
+                        <li class="mb-1"><a asp-controller="FanArt" asp-action="Index">Fan art gallery</a></li>
+                        <li class="mb-1"><a asp-controller="Merch" asp-action="Index">Merchandise</a></li>
+                        <li class="mb-1"><a asp-controller="Bookmarks" asp-action="Index">My bookmarks</a></li>
+                        <li class="mb-1"><a asp-controller="Support" asp-action="Index">Support &amp; FAQ</a></li>
+                        <li class="mb-1"><a asp-controller="Chatbot" asp-action="Index">Chatbot</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="fw-semibold mb-2">Account</div>
+                    <ul class="list-unstyled small footer mb-0">
+                        <li class="mb-1"><a asp-controller="Account" asp-action="Login">Login</a></li>
+                        <li class="mb-1"><a asp-controller="Account" asp-action="Register">Register</a></li>
+                        <li class="mb-1"><a asp-controller="Account" asp-action="Profile">Profile</a></li>
+                        <li class="mb-1"><a asp-controller="Sitemap" asp-action="Index">Sitemap</a></li>
+                        <li class="mb-1"><a asp-controller="Sitemap" asp-action="Xml">sitemap.xml</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr />
+            <div class="small text-muted d-flex justify-content-between flex-wrap gap-2">
+                <span>© 2026 Fan Hub Plus — built for the TechWiz competition.</span>
+                <span><a asp-controller="Sitemap" asp-action="Index">Sitemap</a> · <a asp-controller="Support" asp-action="Index">Contact</a></span>
+            </div>
         </div>
     </footer>
+
+    <partial name="_ChatWidget" />
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+

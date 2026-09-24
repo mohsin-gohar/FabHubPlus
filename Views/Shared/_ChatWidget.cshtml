@@ -1,7 +1,7 @@
 @* Floating chatbot widget - available on every page, talks to /Chatbot/Ask (JSON) *@
 <div id="chatWidget" class="chat-widget d-none">
     <div class="chat-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-robot me-1"></i> FanBot</span>
+        <span>🤖 FanBot</span>
         <button type="button" class="btn-close btn-close-white" id="chatClose" aria-label="Close chat"></button>
     </div>
     <div class="chat-body" id="chatBody">
@@ -12,12 +12,11 @@
         @Html.AntiForgeryToken()
         <input type="text" class="form-control form-control-sm" id="chatText"
                maxlength="1000" placeholder="Type your question..." autocomplete="off" required />
-        <button class="btn btn-primary btn-sm" type="submit" id="chatSend">
-            <i class="bi bi-send"></i>
-        </button>
+        <button class="btn btn-primary btn-sm" type="submit" id="chatSend">➤</button>
     </form>
 </div>
 
 <button type="button" id="chatToggle" class="chat-fab" aria-label="Open chatbot" title="Chat with FanBot">
-    <i class="bi bi-chat-dots-fill"></i>
+    💬
 </button>
+

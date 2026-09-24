@@ -1,0 +1,88 @@
+@model SupportViewModel
+@{
+    ViewData["Title"] = "Support & FAQ";
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Support & FAQ\") }" />
+
+<h1 class="page-title h3 mb-3">🛟 Support &amp; FAQ</h1>
+
+<div class="row g-4">
+    @* ---------------- FAQ accordion ---------------- *@
+    <div class="col-lg-7">
+        <h2 class="section-title h5 mb-3">Frequently asked questions</h2>
+        <div class="accordion" id="faqAccordion">
+            @foreach (var (faq, i) in Model.Faqs.Select((f, i) => (f, i)))
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faqHead@i">
+                        <button class="accordion-button @(i > 0 ? "collapsed" : "")" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#faqBody@i" aria-expanded="@(i == 0 ? "true" : "false")">
+                            @faq.Question
+                        </button>
+                    </h2>
+                    <div id="faqBody@i" class="accordion-collapse collapse @(i == 0 ? "show" : "")"
+                         aria-labelledby="faqHead@i" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">@faq.Answer</div>
+                    </div>
+                </div>
+            }
+            @if (!Model.Faqs.Any())
+            {
+                <div class="empty-state">No FAQs published yet — ask the chatbot instead!</div>
+            }
+        </div>
+    </div>
+
+    @* ---------------- Feedback form ---------------- *@
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5 mb-3">📮 Send feedback</h2>
+
+                @if (Model.FeedbackSent)
+                {
+                    <div class="alert alert-success">
+                        Thank you! Your message reached our admins — track its status from the dashboard.
+                    </div>
+                }
+
+                <form asp-action="Feedback" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label asp-for="FeedbackForm.Type" class="form-label"></label>
+                        <select asp-for="FeedbackForm.Type" class="form-select"
+                                asp-items="Html.GetEnumSelectList<FeedbackType>()"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="FeedbackForm.Message" class="form-label"></label>
+                        <textarea asp-for="FeedbackForm.Message" class="form-control" rows="5"
+                                  placeholder="Describe your bug, suggestion or question..."></textarea>
+                        <span asp-validation-for="FeedbackForm.Message" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="FeedbackForm.ContactEmail" class="form-label"></label>
+                        <input asp-for="FeedbackForm.ContactEmail" class="form-control"
+                               placeholder="Optional — so we can reply to you" />
+                        <span asp-validation-for="FeedbackForm.ContactEmail" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send message</button>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <div class="form-text">Visitors can send feedback without an account.</div>
+                    }
+                </form>
+
+                <hr />
+                <div class="small text-muted">
+                    Prefer chat? Use the 💬 button at the bottom-right, or open the
+                    <a asp-controller="Chatbot" asp-action="Index">full chatbot page</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

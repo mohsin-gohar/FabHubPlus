@@ -1,0 +1,167 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var maxDay = Math.Max(1, Model.ViewsByDay.Select(d => d.Count).DefaultIfEmpty(1).Max());
+    var maxCat = Math.Max(1, Model.ContentsByCategory.Select(c => c.Count).DefaultIfEmpty(1).Max());
+}
+
+<h1 class="page-title h3 mb-4">📊 Dashboard</h1>
+
+@* ---------------- KPI cards ---------------- *@
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Members</div>
+            <div class="stat-value text-primary">@Model.TotalUsers</div>
+            <div class="small text-muted">+@Model.NewUsersThisMonth this month</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Contents</div>
+            <div class="stat-value text-success">@Model.TotalContents</div>
+            <div class="small text-muted">@Model.TotalEvents events · @Model.TotalMerch merch</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Total views</div>
+            <div class="stat-value text-danger">@Model.TotalViews</div>
+            <div class="small text-muted">logged in ViewLogs</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Pending work</div>
+            <div class="stat-value text-warning">@(Model.PendingFeedback + Model.PendingSubmissions)</div>
+            <div class="small text-muted">@Model.PendingFeedback feedback · @Model.PendingSubmissions submissions</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    @* ---------------- Views per day (last 7 days) ---------------- *@
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">Views per day (last 7 days)</h2>
+                <div class="linechart">
+                    @foreach (var d in Model.ViewsByDay)
+                    {
+                        var pct = (int)Math.Round(100.0 * d.Count / maxDay);
+                        <div class="col" title="@d.Count views">
+                            <div class="small fw-semibold">@d.Count</div>
+                            <div class="stick" style="height:@pct%;"></div>
+                            <div class="day">@d.Day.ToString("MMM d")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ---------------- Content per category ---------------- *@
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">Content per category</h2>
+                @foreach (var c in Model.ContentsByCategory)
+                {
+                    var pct = (int)Math.Round(100.0 * c.Count / maxCat);
+                    <div class="bar-row">
+                        <span>@c.Name</span>
+                        <div class="bar-track"><div class="bar-fill" style="width:@pct%;"></div></div>
+                        <span class="text-end text-muted">@c.Count</span>
+                    </div>
+                }
+                @if (Model.ContentsByCategory.Count == 0)
+                {
+                    <div class="empty-state py-3">No categories yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    @* ---------------- Top content ---------------- *@
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">🏆 Top content by views</h2>
+                <table class="table table-sm align-middle mb-0">
+                    <thead><tr><th>Title</th><th>Category</th><th class="text-end">Views</th></tr></thead>
+                    <tbody>
+                        @foreach (var c in Model.TopContents)
+                        {
+                            <tr>
+                                <td>@c.Title</td>
+                                <td><span class="badge bg-secondary rounded-pill">@c.Category.Name</span></td>
+                                <td class="text-end">@c.ViewCount</td>
+                            </tr>
+                        }
+                        @if (Model.TopContents.Count == 0)
+                        {
+                            <tr><td colspan="3" class="text-center text-muted">No data yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* ---------------- Recent activity ---------------- *@
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">💬 Latest feedback</h2>
+                @foreach (var f in Model.RecentFeedback)
+                {
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>@f.Type — @(f.User?.Name ?? "visitor")</span>
+                        <span class="badge bg-@(f.Status == FeedbackStatus.Open ? "warning text-dark" : f.Status == FeedbackStatus.InProgress ? "info" : "success")">@f.Status</span>
+                    </div>
+                }
+                @if (Model.RecentFeedback.Count == 0)
+                {
+                    <div class="small text-muted">No feedback yet.</div>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">🖼 Latest fan submissions</h2>
+                @foreach (var s in Model.RecentSubmissions)
+                {
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>@s.Title — @(s.User?.Name ?? "?")</span>
+                        <span class="badge bg-@(s.Status == SubmissionStatus.Pending ? "warning text-dark" : s.Status == SubmissionStatus.Approved ? "success" : "danger")">@s.Status</span>
+                    </div>
+                }
+                @if (Model.RecentSubmissions.Count == 0)
+                {
+                    <div class="small text-muted">No submissions yet.</div>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h6 section-title mb-3">👥 Newest members</h2>
+                @foreach (var u in Model.RecentUsers)
+                {
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>@u.Name <span class="text-muted">(@u.Email)</span></span>
+                        <span class="text-muted">@u.CreatedAt.ToString("MMM d")</span>
+                    </div>
+                }
+                @if (Model.RecentUsers.Count == 0)
+                {
+                    <div class="small text-muted">No users yet.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

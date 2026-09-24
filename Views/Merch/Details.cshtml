@@ -1,0 +1,60 @@
+@model FanHubPlus.Models.Entities.MerchandiseItem
+@{
+    ViewData["Title"] = Model.Name;
+    var isBookmarked = (bool?)ViewBag.IsBookmarked == true;
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Merchandise\", \"/Merch\"), new(Model.Name) }" />
+
+<div class="row g-4">
+    <div class="col-md-5">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded shadow-sm" />
+        }
+        else
+        {
+            <div class="cover-fallback rounded shadow-sm" style="height:340px;">🛍 @Model.Name</div>
+        }
+    </div>
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h1 class="h2 page-title mb-1">@Model.Name</h1>
+                    @if (Model.Tag != MerchTag.None)
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill">@Model.Tag</span>
+                    }
+                </div>
+
+                <div class="text-muted mb-3">
+                    📂 @Model.Category.Name
+                    @if (Model.IsUpcoming)
+                    {
+                        <span> · 🚀 Upcoming @(Model.ReleaseDate is not null ? "· " + Model.ReleaseDate.Value.ToString("MMMM d, yyyy") : "")</span>
+                    }
+                </div>
+
+                <div class="d-flex gap-3 small text-muted mb-3">
+                    <span>👁 @Model.ViewCount views</span>
+                    <span class="badge bg-info text-dark">Showcase only</span>
+                </div>
+
+                <p class="text-muted">
+                    This item is part of the Fan Hub Plus showcase — browsing and wish-listing only,
+                    payments are not handled by this portal.
+                </p>
+
+                <div class="d-flex gap-2">
+                    <button type="button"
+                            class="btn btn-outline-danger bookmark-btn @(isBookmarked ? "active" : "")"
+                            data-type="@((int)BookmarkType.Merchandise)" data-id="@Model.ItemId">
+                        @(isBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">← Back to merch</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

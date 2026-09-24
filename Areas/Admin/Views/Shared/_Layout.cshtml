@@ -1,0 +1,86 @@
+@using System.Text.RegularExpressions
+@{
+    // Admin area master layout: fixed sidebar + top bar. Shares theme cookie with the public site.
+    var pref = Context.Request.Cookies["fhp_pref"];
+    var dark = pref != null && pref.StartsWith("1");
+    var fontMatch = Regex.Match(pref ?? "", @"\|(\d+)$");
+    var fontPx = fontMatch.Success ? fontMatch.Groups[1].Value : "16";
+    var userName = User.Identity?.Name ?? "";
+    var path = Context.Request.Path.Value ?? "";
+    bool IsActive(string controller) =>
+        path.StartsWith($"/Admin/{controller}", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="en" class="@(dark ? "dark-mode" : null)" style="font-size: @(fontPx)px">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " · " : "")Admin · Fan Hub Plus</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @* ---- Top bar ---- *@
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
+        <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">🛠 FanHub Admin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto"></ul>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-light btn-sm" onclick="fhpToggleTheme()" id="themeToggle">🌙</button>
+                <a class="btn btn-outline-light btn-sm" asp-area="" asp-controller="Home" asp-action="Index">🌍 View site</a>
+                <span class="text-white small">👤 @userName</span>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="btn btn-light btn-sm">Sign out</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-shell">
+        @* ---- Sidebar ---- *@
+        <aside class="admin-sidebar">
+            <div class="side-title">Overview</div>
+            <a class="@(IsActive("Dashboard") || path == "/Admin" ? "active" : "")"
+               asp-area="Admin" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+
+            <div class="side-title">Content</div>
+            <a class="@(IsActive("Contents") ? "active" : "")"
+               asp-area="Admin" asp-controller="Contents" asp-action="Index">🎬 Contents</a>
+            <a class="@(IsActive("Articles") ? "active" : "")"
+               asp-area="Admin" asp-controller="Articles" asp-action="Index">📰 Articles</a>
+            <a class="@(IsActive("Events") ? "active" : "")"
+               asp-area="Admin" asp-controller="Events" asp-action="Index">📅 Events</a>
+            <a class="@(IsActive("Characters") ? "active" : "")"
+               asp-area="Admin" asp-controller="Characters" asp-action="Index">🎭 Characters</a>
+            <a class="@(IsActive("Merch") ? "active" : "")"
+               asp-area="Admin" asp-controller="Merch" asp-action="Index">🛍 Merchandise</a>
+            <a class="@(IsActive("Categories") ? "active" : "")"
+               asp-area="Admin" asp-controller="Categories" asp-action="Index">🏷 Categories</a>
+
+            <div class="side-title">Moderation</div>
+            <a class="@(IsActive("Feedback") ? "active" : "")"
+               asp-area="Admin" asp-controller="Feedback" asp-action="Index">💬 Feedback</a>
+            <a class="@(IsActive("Submissions") ? "active" : "")"
+               asp-area="Admin" asp-controller="Submissions" asp-action="Index">🖼 Submissions</a>
+
+            <div class="side-title">System</div>
+            <a class="@(IsActive("Users") ? "active" : "")"
+               asp-area="Admin" asp-controller="Users" asp-action="Index">👥 Users</a>
+        </aside>
+
+        @* ---- Main ---- *@
+        <div class="admin-main">
+            <partial name="_Alerts" />
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

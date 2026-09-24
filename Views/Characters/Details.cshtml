@@ -1,0 +1,51 @@
+@model CharacterDetailViewModel
+@{
+    ViewData["Title"] = Model.Character.Name;
+    var ch = Model.Character;
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Characters\", \"/Characters\"), new(ch.Name) }" />
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        @if (!string.IsNullOrEmpty(ch.ImageUrl))
+        {
+            <img src="@ch.ImageUrl" alt="@ch.Name" class="img-fluid rounded shadow-sm" />
+        }
+        else
+        {
+            <div class="cover-fallback rounded shadow-sm" style="height:320px;">@ch.Name</div>
+        }
+    </div>
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h1 class="h2 page-title mb-1">@ch.Name</h1>
+                    <button type="button"
+                            class="btn btn-outline-danger bookmark-btn @(Model.IsBookmarked ? "active" : "")"
+                            data-type="@((int)BookmarkType.Character)" data-id="@ch.CharacterId">
+                        @(Model.IsBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
+                    </button>
+                </div>
+                <div class="text-muted mb-3">
+                    🌍 @(ch.Fandom ?? "Unknown fandom") · 📂 @ch.Category.Name
+                </div>
+                <p style="white-space:pre-line;">@(ch.Bio ?? "No biography yet.")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.RelatedContent.Count > 0)
+{
+    <h2 class="section-title h5 mb-3">Content in @ch.Category.Name</h2>
+    <div class="row g-3">
+        @foreach (var r in Model.RelatedContent)
+        {
+            <div class="col-6 col-md-3">
+                <partial name="_ContentCard" model="r" />
+            </div>
+        }
+    </div>
+}

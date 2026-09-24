@@ -1,0 +1,100 @@
+@model AdminListViewModel<Content>
+@{
+    ViewData["Title"] = "Contents";
+    var categories = (List<Category>)ViewBag.Categories;
+    int? categoryId = (int?)ViewBag.CategoryId;
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">🎬 Contents (@Model.TotalItems)</h1>
+    <a asp-action="Create" class="btn btn-primary">＋ New content</a>
+</div>
+
+<form method="get" class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-5">
+                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search title..." />
+            </div>
+            <div class="col-md-4">
+                <select name="categoryId" class="form-select">
+                    <option value="">All categories</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.CategoryId" selected="@(categoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button class="btn btn-outline-primary" type="submit">Filter</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:70px;">Cover</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th class="text-end">Popularity</th>
+                    <th class="text-end">Views</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(c.ThumbnailUrl))
+                            {
+                                <img src="@c.ThumbnailUrl" alt="" style="width:56px;height:40px;object-fit:cover;border-radius:6px;" />
+                            }
+                            else
+                            {
+                                <div class="cover-fallback" style="width:56px;height:40px;font-size:.6rem;border-radius:6px;padding:.2rem;">🎬</div>
+                            }
+                        </td>
+                        <td class="fw-semibold">@c.Title</td>
+                        <td><span class="badge bg-secondary rounded-pill">@c.Category.Name</span></td>
+                        <td><span class="badge badge-type rounded-pill">@c.Type</span></td>
+                        <td class="text-end">@c.PopularityScore</td>
+                        <td class="text-end">@c.ViewCount</td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@c.ContentId" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@c.ContentId" method="post" class="d-inline"
+                                  onsubmit="return confirm('Delete @c.Title? Media rows are cascade-deleted.');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Items.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">No content found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination">
+            <li class="page-item @(!Model.HasPrevious ? "disabled" : "")">
+                <a class="page-link" href="@Model.PageUrl(Model.Page - 1)">«</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Page @Model.Page of @Model.TotalPages</span></li>
+            <li class="page-item @(!Model.HasNext ? "disabled" : "")">
+                <a class="page-link" href="@Model.PageUrl(Model.Page + 1)">»</a>
+            </li>
+        </ul>
+    </nav>
+}

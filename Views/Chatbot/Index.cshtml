@@ -1,0 +1,114 @@
+@model ChatHistoryViewModel
+@{
+    ViewData["Title"] = "Chatbot";
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Chatbot\") }" />
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 page-title mb-1">🤖 FanBot</h1>
+                <p class="text-muted small mb-3">
+                    Ask about categories, events, ratings, bookmarks or search for content —
+                    every conversation is stored so admins can improve the knowledge base.
+                </p>
+
+                <div class="border rounded p-3 mb-3" style="min-height:260px;max-height:420px;overflow-y:auto;" id="pageChatBody">
+                    @foreach (var t in Model.Turns)
+                    {
+                        <div class="chat-msg user mb-2">@t.Question</div>
+                        <div class="chat-msg bot mb-3">@t.Answer</div>
+                    }
+                    @if (Model.Turns.Count == 0)
+                    {
+                        <div class="chat-msg bot">
+                            Hello! 👋 Try: <strong>"categories"</strong>, <strong>"search anime"</strong>
+                            or <strong>"upcoming events"</strong>.
+                        </div>
+                    }
+                </div>
+
+                <form id="pageChatForm" class="input-group">
+                    @Html.AntiForgeryToken()
+                    <input type="text" id="pageChatText" class="form-control" maxlength="1000"
+                           placeholder="Ask FanBot anything..." autocomplete="off" required />
+                    <button class="btn btn-primary" type="submit">Send ➤</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">💡 How it works</h2>
+                <ol class="small text-muted ps-3 mb-3">
+                    <li>Built-in intents detect greetings, search and navigation requests.</li>
+                    <li>Keyword scoring matches your question against the admin-managed FAQ table.</li>
+                    <li>Live database search finds real content titles as a fallback.</li>
+                    <li>Every Q&amp;A is saved to <code>ChatbotQueries</code> for analytics.</li>
+                </ol>
+                <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="chat-suggestion page-chip">categories</button>
+                    <button type="button" class="chat-suggestion page-chip">search anime</button>
+                    <button type="button" class="chat-suggestion page-chip">upcoming events</button>
+                    <button type="button" class="chat-suggestion page-chip">how do ratings work?</button>
+                </div>
+                <hr />
+                <div class="small text-muted">
+                    For a quick widget, use the 💬 floating button present on every page.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var body = document.getElementById('pageChatBody');
+            var form = document.getElementById('pageChatForm');
+            var input = document.getElementById('pageChatText');
+
+            function token() {
+                var el = document.querySelector('input[name="__RequestVerificationToken"]');
+                return el ? el.value : '';
+            }
+            function add(text, who) {
+                var d = document.createElement('div');
+                d.className = 'chat-msg ' + who;
+                d.textContent = text;
+                d.style.marginBottom = who === 'user' ? '.55rem' : '1rem';
+                body.appendChild(d);
+                body.scrollTop = body.scrollHeight;
+                return d;
+            }
+            function send(text) {
+                if (!text) return;
+                add(text, 'user');
+                var pending = add('typing…', 'bot typing');
+                var fd = new FormData();
+                fd.append('message', text);
+                fd.append('__RequestVerificationToken', token());
+                fetch('/Chatbot/Ask', { method: 'POST', body: fd, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        pending.remove();
+                        add(res.reply || '(empty)', 'bot');
+                    })
+                    .catch(function () { pending.remove(); add('Could not reach the server.', 'bot'); });
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                send(input.value.trim());
+                input.value = '';
+            });
+            Array.prototype.forEach.call(document.querySelectorAll('.page-chip'), function (chip) {
+                chip.addEventListener('click', function () { send(chip.textContent.trim()); });
+            });
+        })();
+    </script>
+}

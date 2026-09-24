@@ -1,0 +1,66 @@
+@model CharactersViewModel
+@{
+    ViewData["Title"] = "Characters";
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Characters\") }" />
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">🎭 Characters directory</h1>
+    <span class="text-muted small">@Model.Items.Count character(s)</span>
+</div>
+
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small">Search by name, fandom or bio</label>
+                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="e.g. Naruto..." />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Fandom category</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">All categories</option>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId ? "selected" : null)">@cat.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-grid">
+                <button class="btn btn-primary" type="submit">Filter</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="row g-3">
+    @foreach (var ch in Model.Items)
+    {
+        <div class="col-6 col-md-4 col-lg-3">
+            <a asp-action="Details" asp-route-id="@ch.CharacterId"
+               class="card content-card border-0 shadow-sm text-decoration-none h-100">
+                @if (!string.IsNullOrEmpty(ch.ImageUrl))
+                {
+                    <img src="@ch.ImageUrl" class="card-img-top" alt="@ch.Name" />
+                }
+                else
+                {
+                    <div class="cover-fallback">🎭 @(ch.Fandom ?? ch.Name)</div>
+                }
+                <div class="card-body">
+                    <h2 class="h6 card-title mb-1">@ch.Name</h2>
+                    <div class="small text-muted">@ch.Fandom · @ch.Category.Name</div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <div style="font-size:3rem;">🕵️</div>
+        <p>No characters match your search.</p>
+    </div>
+}

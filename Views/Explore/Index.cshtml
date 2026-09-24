@@ -1,0 +1,96 @@
+@model ExploreViewModel
+@{
+    ViewData["Title"] = "Explore";
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Explore\") }" />
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">🔎 Explore content</h1>
+    <span class="text-muted small">@Model.TotalItems item(s) found</span>
+</div>
+
+@* ---------------- Filters ---------------- *@
+<form method="get" class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small">Search</label>
+                <input type="text" name="search" value="@Model.Search" class="form-control"
+                       placeholder="Title, genre or description..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Category</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">All fandoms</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c.CategoryId" selected="@(Model.CategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All types</option>
+                    @foreach (var t in Enum.GetValues<ContentType>())
+                    {
+                        <option value="@t" selected="@(Model.Type == t ? "selected" : null)">@t</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Sort by</label>
+                <select name="sort" class="form-select">
+                    <option value="popular" selected="@(Model.Sort == "popular" ? "selected" : null)">Popularity</option>
+                    <option value="newest" selected="@(Model.Sort == "newest" ? "selected" : null)">Newest</option>
+                    <option value="views" selected="@(Model.Sort == "views" ? "selected" : null)">Most viewed</option>
+                    <option value="title" selected="@(Model.Sort == "title" ? "selected" : null)">Title A–Z</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-primary" type="submit">Go</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@* ---------------- Results ---------------- *@
+<div class="row g-3 mb-4">
+    @foreach (var item in Model.Items)
+    {
+        <div class="col-6 col-md-4 col-lg-3">
+            <partial name="_ContentCard" model="item" />
+        </div>
+    }
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <div style="font-size:3rem;">🕳</div>
+        <p>No content matches your filters. Try a different keyword or category.</p>
+        <a asp-action="Index" class="btn btn-outline-primary btn-sm">Clear filters</a>
+    </div>
+}
+
+@* ---------------- Pagination ---------------- *@
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Explorer pages">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                <a class="page-link" href="@Model.PageUrl(Math.Max(1, Model.Page - 1))">« Prev</a>
+            </li>
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link" href="@Model.PageUrl(p)">@p</a>
+                </li>
+            }
+            <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                <a class="page-link" href="@Model.PageUrl(Model.Page + 1)">Next »</a>
+            </li>
+        </ul>
+    </nav>
+}

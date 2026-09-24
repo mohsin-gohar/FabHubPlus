@@ -1,0 +1,64 @@
+@model MyBookmarksViewModel
+@{
+    ViewData["Title"] = "My Bookmarks";
+}
+
+<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"My Bookmarks\") }" />
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">♥ My bookmarks</h1>
+    <span class="text-muted small">@Model.Groups.Sum(g => g.Items.Count) saved item(s)</span>
+</div>
+
+@if (Model.Groups.Count == 0)
+{
+    <div class="empty-state">
+        <div style="font-size:3rem;">🔖</div>
+        <p>You have no bookmarks yet. Tap ♡ Bookmark on any content, character, article or merch page.</p>
+        <a asp-controller="Explore" asp-action="Index" class="btn btn-primary">Explore content</a>
+    </div>
+}
+else
+{
+    @foreach (var group in Model.Groups)
+    {
+        var icon = group.Type switch
+        {
+            BookmarkType.Content => "🎬",
+            BookmarkType.Article => "📰",
+            BookmarkType.Character => "🎭",
+            BookmarkType.Merchandise => "🛍",
+            BookmarkType.Video => "🎞",
+            _ => "🔖"
+        };
+        <h2 class="section-title h5 mt-4 mb-3">@icon @group.Type</h2>
+        <div class="list-group shadow-sm mb-4">
+            @foreach (var item in group.Items)
+            {
+                <div class="list-group-item py-3">
+                    <div class="d-flex w-100 justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <a href="@item.LinkUrl" class="fw-semibold text-reset">@item.Title</a>
+                            @if (!string.IsNullOrEmpty(item.Subtitle))
+                            {
+                                <div class="small text-muted">@item.Subtitle</div>
+                            }
+                            @if (!string.IsNullOrEmpty(item.Note))
+                            {
+                                <div class="small fst-italic text-primary">📝 @item.Note</div>
+                            }
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted mb-1">saved @item.CreatedAt.ToString("MMM d, yyyy")</div>
+                            <form asp-action="Remove" asp-route-id="@item.BookmarkId" method="post"
+                                  onsubmit="return confirm('Remove this bookmark?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}

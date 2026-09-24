@@ -1,0 +1,100 @@
+@model AdminListViewModel<FanSubmission>
+@{
+    ViewData["Title"] = "Submissions";
+    var statusFilter = (SubmissionStatus?)ViewBag.StatusFilter;
+    var pendingCount = (int)ViewBag.PendingCount;
+}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <h1 class="page-title h3 mb-0">🖼 Fan submissions</h1>
+    @if (pendingCount > 0)
+    {
+        <span class="badge bg-warning text-dark rounded-pill">@pendingCount pending review</span>
+    }
+</div>
+
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        <a class="nav-link @(statusFilter is null ? "active" : "")" asp-action="Index">All</a>
+    </li>
+    @foreach (var s in Enum.GetValues<SubmissionStatus>())
+    {
+        <li class="nav-item">
+            <a class="nav-link @(statusFilter == s ? "active" : "")"
+               asp-action="Index" asp-route-status="@s">@s</a>
+        </li>
+    }
+</ul>
+
+<div class="row g-3">
+    @foreach (var s in Model.Items)
+    {
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                @if (!string.IsNullOrEmpty(s.ImageUrl))
+                {
+                    <img src="@s.ImageUrl" class="card-img-top" alt="@s.Title" style="height:170px;object-fit:cover;" />
+                }
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <h2 class="h6 card-title mb-0">@s.Title</h2>
+                        <span class="badge rounded-pill @(s.Status == SubmissionStatus.Pending ? "bg-warning text-dark" : s.Status == SubmissionStatus.Approved ? "bg-success" : "bg-danger")">@s.Status</span>
+                    </div>
+                    <div class="small text-muted mb-2">
+                        👤 @(s.User?.Name ?? "?") · 📅 @s.CreatedAt.ToString("MMM d, yyyy")
+                    </div>
+                    <p class="small mb-3" style="max-height:110px;overflow:hidden;">
+                        @(s.Body.Length > 220 ? s.Body[..220] + "…" : s.Body)
+                    </p>
+
+                    <div class="d-flex gap-1 flex-wrap">
+                        @if (s.Status != SubmissionStatus.Approved)
+                        {
+                            <form asp-action="SetStatus" asp-route-id="@s.SubmissionId"
+                                  asp-route-status="@SubmissionStatus.Approved" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-success">✔ Approve</button>
+                            </form>
+                        }
+                        @if (s.Status != SubmissionStatus.Rejected)
+                        {
+                            <form asp-action="SetStatus" asp-route-id="@s.SubmissionId"
+                                  asp-route-status="@SubmissionStatus.Rejected" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger">✖ Reject</button>
+                            </form>
+                        }
+                        <form asp-action="Delete" asp-route-id="@s.SubmissionId" method="post" class="d-inline ms-auto"
+                              onsubmit="return confirm('Delete permanently?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">🗑</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <div style="font-size:3rem;">📭</div>
+        <p>No submissions in this view.</p>
+    </div>
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination">
+            <li class="page-item @(!Model.HasPrevious ? "disabled" : "")">
+                <a class="page-link" href="?status=@statusFilter&page=@(Model.Page - 1)">«</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Page @Model.Page of @Model.TotalPages</span></li>
+            <li class="page-item @(!Model.HasNext ? "disabled" : "")">
+                <a class="page-link" href="?status=@statusFilter&page=@(Model.Page + 1)">»</a>
+            </li>
+        </ul>
+    </nav>
+}

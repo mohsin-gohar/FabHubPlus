@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FanHubPlus")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d6bccdd10fc0f2b88d936a91b01bd2af5a174cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+53d7da56edf048e8ef14fc6457de5899cdbaf87f")]
 [assembly: System.Reflection.AssemblyProductAttribute("FanHubPlus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FanHubPlus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

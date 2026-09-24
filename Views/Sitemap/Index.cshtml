@@ -1,9 +1,10 @@
 @model SitemapViewModel
 @{
     ViewData["Title"] = "Sitemap";
+    var crumbs = new List<BreadcrumbItem> { new("Sitemap") };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Sitemap\") }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <h1 class="page-title h3 mb-1">🗺 Sitemap</h1>
 <p class="text-muted small mb-4">

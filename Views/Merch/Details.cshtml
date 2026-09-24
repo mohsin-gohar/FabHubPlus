@@ -2,9 +2,10 @@
 @{
     ViewData["Title"] = Model.Name;
     var isBookmarked = (bool?)ViewBag.IsBookmarked == true;
+    var crumbs = new List<BreadcrumbItem> { new("Merchandise", "/Merch"), new(Model.Name) };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Merchandise\", \"/Merch\"), new(Model.Name) }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <div class="row g-4">
     <div class="col-md-5">

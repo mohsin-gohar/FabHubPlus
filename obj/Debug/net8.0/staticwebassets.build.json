@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "R6kvzXdiAqokgmd7CHETyWiC2cWdA8s+jMHpH2fEaYc=",
+  "Hash": "YlXAryeXE41eTvfoU+JdV72vRVUiDQG1tFIq2ZKCYAk=",
   "Source": "FanHubPlus",
   "BasePath": "_content/FanHubPlus",
   "Mode": "Default",
@@ -16,44 +16,6 @@
     }
   ],
   "Assets": [
-    {
-      "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\bundle\\FanHubPlus.styles.css",
-      "SourceId": "FanHubPlus",
-      "SourceType": "Computed",
-      "ContentRoot": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
-      "BasePath": "_content/FanHubPlus",
-      "RelativePath": "FanHubPlus.styles.css",
-      "AssetKind": "All",
-      "AssetMode": "CurrentProject",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "ScopedCss",
-      "AssetTraitValue": "ApplicationBundle",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\bundle\\FanHubPlus.styles.css"
-    },
-    {
-      "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\FanHubPlus.bundle.scp.css",
-      "SourceId": "FanHubPlus",
-      "SourceType": "Computed",
-      "ContentRoot": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
-      "BasePath": "_content/FanHubPlus",
-      "RelativePath": "FanHubPlus.bundle.scp.css",
-      "AssetKind": "All",
-      "AssetMode": "Reference",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "ScopedCss",
-      "AssetTraitValue": "ProjectBundle",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\FanHubPlus.bundle.scp.css"
-    },
     {
       "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\css\\site.css",
       "SourceId": "FanHubPlus",

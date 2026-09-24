@@ -1,9 +1,10 @@
 @model SupportViewModel
 @{
     ViewData["Title"] = "Support & FAQ";
+    var crumbs = new List<BreadcrumbItem> { new("Support & FAQ") };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Support & FAQ\") }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <h1 class="page-title h3 mb-3">🛟 Support &amp; FAQ</h1>
 

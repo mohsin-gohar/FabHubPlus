@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Users";
     var search = (string?)ViewBag.Search;
-    var page = (int)ViewBag.Page;
+    var pageNum = (int)ViewBag.Page;
     var totalPages = (int)ViewBag.TotalPages;
     var totalItems = (int)ViewBag.TotalItems;
 }
@@ -82,12 +82,12 @@
 {
     <nav class="mt-3">
         <ul class="pagination">
-            <li class="page-item @((page <= 1) ? "disabled" : "")">
-                <a class="page-link" href="?page=@(page - 1)&search=@Uri.EscapeDataString(search ?? "")">«</a>
+            <li class="page-item @((pageNum <= 1) ? "disabled" : "")">
+                <a class="page-link" href="?page=@(pageNum - 1)&search=@Uri.EscapeDataString(search ?? "")">«</a>
             </li>
-            <li class="page-item disabled"><span class="page-link">Page @page of @totalPages</span></li>
-            <li class="page-item @((page >= totalPages) ? "disabled" : "")">
-                <a class="page-link" href="?page=@(page + 1)&search=@Uri.EscapeDataString(search ?? "")">»</a>
+            <li class="page-item disabled"><span class="page-link">Page @pageNum of @totalPages</span></li>
+            <li class="page-item @((pageNum >= totalPages) ? "disabled" : "")">
+                <a class="page-link" href="?page=@(pageNum + 1)&search=@Uri.EscapeDataString(search ?? "")">»</a>
             </li>
         </ul>
     </nav>

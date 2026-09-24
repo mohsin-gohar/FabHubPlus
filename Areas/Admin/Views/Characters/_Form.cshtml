@@ -1,0 +1,70 @@
+@model CharacterFormViewModel
+@{
+    var isEdit = Model.CharacterId != 0;
+    ViewData["Title"] = isEdit ? "Edit character" : "New character";
+}
+
+<h1 class="page-title h3 mb-3">@(isEdit ? "✏️ Edit character" : "＋ New character")</h1>
+
+<div class="card border-0 shadow-sm" style="max-width:720px;">
+    <div class="card-body p-4">
+        <form action="@(isEdit ? Url.Action("Edit", new { id = Model.CharacterId }) : Url.Action("Create"))"
+              method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="CharacterId" />
+                <input type="hidden" asp-for="ImageUrl" />
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" autofocus />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <select asp-for="CategoryId" class="form-select"
+                            asp-items="new SelectList(Model.Categories, nameof(Category.CategoryId), nameof(Category.Name))">
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Fandom" class="form-label"></label>
+                    <input asp-for="Fandom" class="form-control" placeholder="e.g. Naruto, Marvel..." />
+                    <span asp-validation-for="Fandom" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ImageFile" class="form-label"></label>
+                    <input asp-for="ImageFile" class="form-control" accept="image/*" />
+                    <span asp-validation-for="ImageFile" class="text-danger small"></span>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <div class="mt-2">
+                            <img src="@Model.ImageUrl" alt="current image"
+                                 style="height:70px;border-radius:50%;width:70px;object-fit:cover;" />
+                            <div class="form-text">Leave empty to keep the current image.</div>
+                        </div>
+                    }
+                </div>
+                <div class="col-12">
+                    <label asp-for="Bio" class="form-label"></label>
+                    <textarea asp-for="Bio" class="form-control" rows="6"
+                              placeholder="Character biography / background..."></textarea>
+                    <span asp-validation-for="Bio" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <hr />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save character</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

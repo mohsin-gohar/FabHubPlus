@@ -1,9 +1,10 @@
 @model EventsViewModel
 @{
     ViewData["Title"] = "Events";
+    var crumbs = new List<BreadcrumbItem> { new("Events") };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Events\") }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <h1 class="page-title h3 mb-0">📅 Fandom events</h1>

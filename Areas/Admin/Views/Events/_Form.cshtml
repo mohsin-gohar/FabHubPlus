@@ -1,0 +1,75 @@
+@model EventFormViewModel
+@{
+    var isEdit = Model.EventId != 0;
+    ViewData["Title"] = isEdit ? "Edit event" : "New event";
+}
+
+<h1 class="page-title h3 mb-3">@(isEdit ? "✏️ Edit event" : "＋ New event")</h1>
+
+<div class="card border-0 shadow-sm" style="max-width:820px;">
+    <div class="card-body p-4">
+        <form action="@(isEdit ? Url.Action("Edit", new { id = Model.EventId }) : Url.Action("Create"))"
+              method="post">
+            @Html.AntiForgeryToken()
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="EventId" />
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" autofocus />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Type" class="form-label"></label>
+                    <input asp-for="Type" class="form-control" placeholder="Convention, Screening..." />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="City" class="form-label"></label>
+                    <input asp-for="City" class="form-control" />
+                    <span asp-validation-for="City" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="EventDate" class="form-label"></label>
+                    <input asp-for="EventDate" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="EventDate" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Latitude" class="form-label"></label>
+                    <input asp-for="Latitude" class="form-control" type="number" step="any" />
+                    <span asp-validation-for="Latitude" class="text-danger small"></span>
+                    <div class="form-text">Used for the Leaflet map pin (e.g. 35.6812).</div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Longitude" class="form-label"></label>
+                    <input asp-for="Longitude" class="form-control" type="number" step="any" />
+                    <span asp-validation-for="Longitude" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="TicketUrl" class="form-label"></label>
+                    <input asp-for="TicketUrl" class="form-control" placeholder="https://..." />
+                    <span asp-validation-for="TicketUrl" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Story" class="form-label"></label>
+                    <textarea asp-for="Story" class="form-control" rows="5"
+                              placeholder="Event description / story..."></textarea>
+                    <span asp-validation-for="Story" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <hr />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save event</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

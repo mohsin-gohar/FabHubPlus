@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+F:\.net\FanHubPlus\FanHubPlus\Views\Shared\_ContentCard.cshtml(24,55): warning CS8602: Dereference of a possibly null reference. [F:\.net\FanHubPlus\FanHubPlus\FanHubPlus.csproj]
+  FanHubPlus -> F:\.net\FanHubPlus\FanHubPlus\bin\Debug\net8.0\FanHubPlus.dll
+
+Build succeeded.
+
+F:\.net\FanHubPlus\FanHubPlus\Views\Shared\_ContentCard.cshtml(24,55): warning CS8602: Dereference of a possibly null reference. [F:\.net\FanHubPlus\FanHubPlus\FanHubPlus.csproj]
+    1 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:41.78

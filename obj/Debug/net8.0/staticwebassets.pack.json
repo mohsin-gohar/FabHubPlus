@@ -1,10 +1,6 @@
 {
   "Files": [
     {
-      "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\FanHubPlus.bundle.scp.css",
-      "PackagePath": "staticwebassets\\FanHubPlus.bundle.scp.css"
-    },
-    {
       "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

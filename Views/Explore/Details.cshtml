@@ -2,9 +2,10 @@
 @{
     ViewData["Title"] = Model.Content.Title;
     var c = Model.Content;
+    var crumbs = new List<BreadcrumbItem> { new("Explore", "/Explore"), new(c.Title) };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"Explore\", \"/Explore\"), new(c.Title) }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <div class="row g-4 mb-4">
     @* ---------------- Cover / media ---------------- *@

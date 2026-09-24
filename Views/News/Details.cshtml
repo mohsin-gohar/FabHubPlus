@@ -2,9 +2,10 @@
 @{
     ViewData["Title"] = Model.Article.Title;
     var a = Model.Article;
+    var crumbs = new List<BreadcrumbItem> { new("News & Timeline", "/News"), new(a.Title) };
 }
 
-<partial name="_Breadcrumbs" model="new List<BreadcrumbItem> { new(\"News & Timeline\", \"/News\"), new(a.Title) }" />
+<partial name="_Breadcrumbs" model="crumbs" />
 
 <div class="row g-4">
     <div class="col-lg-8">

@@ -137,9 +137,7 @@ F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\staticwebassets\msbuild.build.Fan
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.FanHubPlus.props
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.FanHubPlus.props
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\staticwebassets.pack.json
-F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\scopedcss\bundle\FanHubPlus.styles.css
-F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\scopedcss\projectbundle\FanHubPlus.bundle.scp.css
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\FanHubPlus.csproj.Up2Date
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\FanHubPlus.dll
 F:\.net\FanHubPlus\FanHubPlus\obj\Debug\net8.0\refint\FanHubPlus.dll

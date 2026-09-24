@@ -1,5 +1,7 @@
 ﻿using FanHubPlus.Data;
 using FanHubPlus.Models.Entities;
+using FanHubPlus.Repositories;
+using FanHubPlus.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,11 +44,23 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// Runs automatically on startup: roles, admin user, demo user, 8 categories
+// ---------- Generic Repository (Unit of Work = shared scoped DbContext) ----------
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// ---------- Application services (Controller -> Service -> Repository -> EF Core) ----------
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IBookmarkService, BookmarkService>();
+builder.Services.AddScoped<ISupportService, SupportService>();
+
+// Runs automatically on startup: roles, admin user, demo user, 8 categories, demo content
 builder.Services.AddScoped<DbSeeder>();
 
-// NOTE (later modules): EmailService, FileService, ChatbotService, StatsService
-// will be registered here with builder.Services.AddScoped<...>().
+var app = builder.Build();
+
 
 var app = builder.Build();
 
@@ -84,5 +98,8 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Friendly error page for 404 / 500 (status code middleware re-executes Home/Error?statusCode=...)
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
 app.Run();

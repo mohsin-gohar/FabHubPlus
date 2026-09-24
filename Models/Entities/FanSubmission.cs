@@ -20,6 +20,9 @@ public class FanSubmission
     [StringLength(8000)]
     public string Body { get; set; } = string.Empty;     // the fan article / post text
 
+    [StringLength(300)]
+    public string? ImageUrl { get; set; }                // optional fan-art picture
+
     public SubmissionStatus Status { get; set; } = SubmissionStatus.Pending;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

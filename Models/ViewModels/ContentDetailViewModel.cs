@@ -9,6 +9,9 @@ public class ContentDetailViewModel
     public List<MediaItem> Media { get; set; } = new();
     public List<Content> Related { get; set; } = new();
 
+    // Fandom list for the sticky sidebar (read-only navigation aid)
+    public List<Category> Categories { get; set; } = new();
+
     // Rating summary
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }

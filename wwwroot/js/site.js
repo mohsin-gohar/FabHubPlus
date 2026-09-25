@@ -41,7 +41,7 @@
         pref.dark = !pref.dark;
         writePref(pref); applyPref(pref);
         var btn = document.getElementById('themeToggle');
-        if (btn) btn.textContent = pref.dark ? '☀️' : '🌙';
+        if (btn) btn.textContent = pref.dark ? 'â˜€ï¸' : 'ðŸŒ™';
     };
     window.fhpFontStep = function (delta) {
         var pref = readPref();
@@ -109,7 +109,7 @@
         function send(text) {
             if (!text) return;
             addMsg(text, 'user');
-            var typing = addMsg('typing…', 'bot typing');
+            var typing = addMsg('typingâ€¦', 'bot typing');
             var fd = new FormData();
             fd.append('message', text);
             fd.append('__RequestVerificationToken', token());
@@ -133,56 +133,64 @@
     });
 
     // ---------- Star rating (AJAX) ----------
+    // Supports the component markup (.fhp-rate button[data-star]) and the legacy
+    // .star spans, so pages can migrate one at a time without breaking either.
     document.addEventListener('DOMContentLoaded', function () {
         var wrap = document.getElementById('ratingWidget');
         if (!wrap) return;
         var contentId = wrap.getAttribute('data-content-id');
-        var stars = Array.prototype.slice.call(wrap.querySelectorAll('.star'));
+        var stars = Array.prototype.slice.call(wrap.querySelectorAll('[data-star]'));
 
         function paint(n, hover) {
-            stars.forEach(function (s, i) {
-                if (hover) s.classList.toggle('hover', i < n);
-                else s.classList.toggle('on', i < n);
-            });
+            stars.forEach(function (s, i) { s.classList.toggle(hover ? 'hover' : 'is-on', i < n); });
+        }
+
+        function commit(value) {
+            var fd = new FormData();
+            fd.append('contentId', contentId);
+            fd.append('stars', String(value));
+            fd.append('__RequestVerificationToken', token());
+            fetch('/Explore/Rate', { method: 'POST', body: fd, credentials: 'same-origin' })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.auth === false) {
+                        window.location = '/Account/Login?returnUrl=' + encodeURIComponent(location.pathname);
+                        return;
+                    }
+                    if (!res.ok) { if (res.message) fhpToast(res.message); return; }
+                    wrap.setAttribute('data-my-stars', res.myStars);
+                    paint(res.myStars, false);
+                    var avg = document.getElementById('ratingAvg');
+                    var cnt = document.getElementById('ratingCount');
+                    var row = document.getElementById('ratingStars');
+                    if (avg) avg.textContent = res.avg;
+                    if (cnt) cnt.textContent = '(' + res.count + ' ratings)';
+                    if (row) {
+                        Array.prototype.forEach.call(row.querySelectorAll('i'), function (icon, i) {
+                            icon.style.opacity = i < Math.round(res.avg) ? '1' : '.35';
+                        });
+                    }
+                });
         }
 
         stars.forEach(function (star, i) {
-            star.addEventListener('mouseenter', function () { paint(i + 1, true); });
+            var value = parseInt(star.getAttribute('data-star'), 10) || (i + 1);
+            star.addEventListener('mouseenter', function () { paint(value, true); });
             star.addEventListener('mouseleave', function () {
                 stars.forEach(function (s) { s.classList.remove('hover'); });
                 paint(parseInt(wrap.getAttribute('data-my-stars') || '0', 10), false);
             });
-            star.addEventListener('click', function () {
-                var fd = new FormData();
-                fd.append('contentId', contentId);
-                fd.append('stars', String(i + 1));
-                fd.append('__RequestVerificationToken', token());
-                fetch('/Explore/Rate', { method: 'POST', body: fd, credentials: 'same-origin' })
-                    .then(function (r) { return r.json(); })
-                    .then(function (res) {
-                        if (res.auth === false) {
-                            window.location = '/Account/Login?returnUrl=' + encodeURIComponent(location.pathname);
-                            return;
-                        }
-                        if (res.ok) {
-                            wrap.setAttribute('data-my-stars', res.myStars);
-                            paint(res.myStars, false);
-                            var avg = document.getElementById('ratingAvg');
-                            var cnt = document.getElementById('ratingCount');
-                            if (avg) avg.textContent = res.avg;
-                            if (cnt) cnt.textContent = '(' + res.count + ' ratings)';
-                        } else if (res.message) { alert(res.message); }
-                    });
-            });
+            star.addEventListener('click', function () { commit(value); });
         });
         paint(parseInt(wrap.getAttribute('data-my-stars') || '0', 10), false);
     });
 
-    // ---------- Bookmark toggle (AJAX) ----------
+    // ---------- Bookmark toggle (AJAX, icon preserving) ----------
     document.addEventListener('DOMContentLoaded', function () {
         Array.prototype.forEach.call(document.querySelectorAll('.bookmark-btn'), function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
+                btn.disabled = true;
                 var fd = new FormData();
                 fd.append('type', btn.getAttribute('data-type'));
                 fd.append('itemId', btn.getAttribute('data-id'));
@@ -190,18 +198,61 @@
                 fetch('/Bookmarks/Toggle', { method: 'POST', body: fd, credentials: 'same-origin' })
                     .then(function (r) { return r.json(); })
                     .then(function (res) {
+                        btn.disabled = false;
                         if (res.auth === false) {
                             window.location = '/Account/Login?returnUrl=' + encodeURIComponent(location.pathname);
                             return;
                         }
-                        if (res.ok) {
-                            btn.classList.toggle('active', res.bookmarked);
-                            btn.textContent = res.bookmarked ? '♥ Bookmarked' : '♡ Bookmark';
-                            btn.title = res.message;
-                        }
-                    });
+                        if (!res.ok) return;
+                        btn.classList.toggle('is-saved', res.bookmarked);
+                        btn.setAttribute('aria-pressed', res.bookmarked ? 'true' : 'false');
+                        var icon = btn.querySelector('i');
+                        if (icon) icon.className = res.bookmarked ? 'ri-heart-fill' : 'ri-heart-line';
+                        var label = btn.querySelector('.bookmark-btn__label');
+                        if (label) label.textContent = res.bookmarked ? 'Bookmarked' : 'Bookmark';
+                        if (res.message) fhpToast(res.message);
+                    })
+                    .catch(function () { btn.disabled = false; fhpToast('Could not reach the server. Please try again.'); });
             });
         });
     });
-})();
 
+    // ---------- Share (Web Share API with clipboard fallback) ----------
+    document.addEventListener('DOMContentLoaded', function () {
+        Array.prototype.forEach.call(document.querySelectorAll('.fhp-share'), function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var url = new URL(btn.getAttribute('data-share-url') || location.href, location.origin).href;
+                var title = btn.getAttribute('data-share-title') || document.title;
+                if (navigator.share) {
+                    navigator.share({ title: title, url: url }).catch(function () { });
+                    return;
+                }
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url).then(
+                        function () { fhpToast('Link copied to clipboard'); },
+                        function () { fhpToast(url); });
+                } else { fhpToast(url); }
+            });
+        });
+    });
+
+    // ---------- Toast ----------
+    var fhpToastTimer;
+    function fhpToast(message) {
+        if (!message) return;
+        var el = document.querySelector('.fhp-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.className = 'fhp-toast';
+            el.setAttribute('role', 'status');
+            el.setAttribute('aria-live', 'polite');
+            document.body.appendChild(el);
+        }
+        el.textContent = message;
+        el.classList.add('is-visible');
+        clearTimeout(fhpToastTimer);
+        fhpToastTimer = setTimeout(function () { el.classList.remove('is-visible'); }, 2600);
+    }
+    window.fhpToast = fhpToast;
+})();

@@ -71,6 +71,21 @@ public class MerchController : Controller
         ViewBag.IsBookmarked = user is not null &&
             await _bookmarks.IsBookmarkedAsync(user.Id, BookmarkType.Merchandise, id);
 
-        return View(item);
+        var vm = new MerchDetailViewModel
+        {
+            Item = item,
+            IsBookmarked = (bool)ViewBag.IsBookmarked,
+            Related = await _merch.Query()
+                .Include(m => m.Category)
+                .Where(m => m.CategoryId == item.CategoryId && m.ItemId != id)
+                .OrderByDescending(m => m.ViewCount)
+                .Take(4)
+                .ToListAsync(),
+            Categories = await _categories.Query()
+                .OrderBy(c => c.Name)
+                .ToListAsync(),
+        };
+
+        return View(vm);
     }
 }

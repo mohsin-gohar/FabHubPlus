@@ -17,4 +17,5 @@ public class ArticleDetailViewModel
     public Article Article { get; set; } = null!;
     public List<Article> Related { get; set; } = new();
     public bool IsBookmarked { get; set; }
+    public List<Category> Categories { get; set; } = new();
 }

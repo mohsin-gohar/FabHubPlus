@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "lko0NJKFq7oF1P4qgVHame6eLAdX8wpDKuRUDkxsOOs=",
+  "Hash": "pfT1tpoMcGBfb+UISaZcg87cBtYOJR3lWuJLUAeNybI=",
   "Source": "FanHubPlus",
   "BasePath": "_content/FanHubPlus",
   "Mode": "Default",
@@ -5981,6 +5981,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\uploads\\avatars\\fe6ae7d259154ef9855d931935a31fe9.jpg",
+      "SourceId": "FanHubPlus",
+      "SourceType": "Discovered",
+      "ContentRoot": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\",
+      "BasePath": "_content/FanHubPlus",
+      "RelativePath": "uploads/avatars/fe6ae7d259154ef9855d931935a31fe9.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\avatars\\fe6ae7d259154ef9855d931935a31fe9.jpg"
     }
   ]
 }

@@ -1,93 +1,94 @@
 @model MerchViewModel
 @{
     ViewData["Title"] = "Merchandise";
-    var crumbs = new List<BreadcrumbItem> { new("Merchandise") };
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Merchandise") };
+    var activeTag = Model.Tag;
+    var activeCategory = Model.CategoryId;
+    var onlyUpcoming = Model.Upcoming == true;
+    string LinkTo(MerchTag? tag, int? categoryId, bool? upcoming) => Url.Action("Index", "Merch", new
+    {
+        tag,
+        categoryId,
+        upcoming,
+    }) ?? "#";
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
-    <h1 class="page-title h3 mb-0">🛍 Merchandise showcase</h1>
-    <span class="badge bg-info text-dark rounded-pill">Display only — no payments</span>
-</div>
-<p class="text-muted small mb-3">Limited editions, pre-orders and collectibles from your favourite fandoms.</p>
-
-<form method="get" class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label small">Tag</label>
-                <select name="tag" class="form-select">
-                    <option value="">All tags</option>
-                    @foreach (var t in Enum.GetValues<MerchTag>())
-                    {
-                        <option value="@t" selected="@(Model.Tag == t ? "selected" : null)">@t</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small">Category</label>
-                <select name="categoryId" class="form-select">
-                    <option value="">All categories</option>
-                    @foreach (var c in Model.Categories)
-                    {
-                        <option value="@c.CategoryId" selected="@(Model.CategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" name="upcoming" value="true" id="upCheck"
-                           checked="@(Model.Upcoming == true ? "checked" : null)" />
-                    <label class="form-check-label small" for="upCheck">Upcoming only</label>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+            <div>
+                <div class="fhp-panel fhp-panel--flush">
+                    <div class="fhp-panel__head">
+                        <h1 class="fhp-panel__title">Official drops &amp; collectibles</h1>
+                        <p class="fhp-hint">A display-only showcase &mdash; no cart, no checkout.</p>
+                    </div>
+                    <div class="fhp-chips">
+                        <a class="fhp-chip @(activeTag is null && activeCategory is null && !onlyUpcoming ? "is-active" : "")"
+                           href="@LinkTo(null, null, null)">Everything</a>
+                        @foreach (var tag in Enum.GetValues<MerchTag>())
+                        {
+                            <a class="fhp-chip @(activeTag == tag ? "is-active" : "")" href="@LinkTo(tag, activeCategory, onlyUpcoming ? true : null)">@tag</a>
+                        }
+                        <a class="fhp-chip @(onlyUpcoming ? "is-active" : "")" href="@LinkTo(activeTag, activeCategory, onlyUpcoming ? null : true)">Pre-orders</a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2 d-grid">
-                <button class="btn btn-primary" type="submit">Filter</button>
-            </div>
-        </div>
-    </div>
-</form>
 
-<div class="row g-3">
-    @foreach (var m in Model.Items)
-    {
-        <div class="col-6 col-md-4 col-lg-3">
-            <a asp-action="Details" asp-route-id="@m.ItemId"
-               class="card content-card border-0 shadow-sm text-decoration-none h-100">
-                @if (!string.IsNullOrEmpty(m.ImageUrl))
+                @if (Model.Items.Count == 0)
                 {
-                    <img src="@m.ImageUrl" class="card-img-top" alt="@m.Name" />
+                    <div class="fhp-empty">
+                        <h2 class="fhp-empty__title">Nothing on this shelf</h2>
+                        <p>No merchandise matches those filters right now.</p>
+                        <a class="fhp-btn fhp-btn--primary" asp-controller="Merch" asp-action="Index">Show everything</a>
+                    </div>
                 }
                 else
                 {
-                    <div class="cover-fallback">🛍 @m.Name</div>
-                }
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h2 class="h6 card-title mb-1">@m.Name</h2>
-                        @if (m.Tag != MerchTag.None)
+                    <div class="fhp-grid fhp-grid--2 fhp-mt-25">
+                        @foreach (var item in Model.Items)
                         {
-                            <span class="badge bg-warning text-dark rounded-pill">@m.Tag</span>
+                            <partial name="_MerchCard" model="item" />
                         }
                     </div>
-                    <div class="small text-muted">@m.Category.Name</div>
-                    @if (m.IsUpcoming)
-                    {
-                        <div class="small text-primary mt-1">
-                            🚀 Upcoming @(m.ReleaseDate is not null ? "· " + m.ReleaseDate.Value.ToString("MMM d, yyyy") : "")
-                        </div>
-                    }
-                </div>
-            </a>
-        </div>
-    }
-</div>
+                }
+            </div>
 
-@if (Model.Items.Count == 0)
-{
-    <div class="empty-state">
-        <div style="font-size:3rem;">🛒</div>
-        <p>No merchandise matches these filters.</p>
+            <aside class="fhp-aside" aria-label="Merchandise filters">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Search the store</h2>
+                    <form class="fhp-search fhp-mb-25" method="get" asp-controller="Merch" asp-action="Index" role="search">
+                        <label class="fhp-sr" for="merchSearch">Search merchandise</label>
+                        <input id="merchSearch" type="search" name="search" placeholder="Product name" />
+                        <button type="submit"><i class="ri-search-line" aria-hidden="true"></i><span class="fhp-sr">Search</span></button>
+                    </form>
+
+                    <h2 class="fhp-side-title">Fandoms</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Merch" asp-action="Index"
+                               asp-route-tag="@activeTag" asp-route-upcoming="@(onlyUpcoming ? true : null)"
+                               class="@(activeCategory is null ? "is-active" : "")">
+                                All fandoms <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <li>
+                                <a asp-controller="Merch" asp-action="Index"
+                                   asp-route-categoryId="@category.CategoryId"
+                                   asp-route-tag="@activeTag" asp-route-upcoming="@(onlyUpcoming ? true : null)"
+                                   class="@(activeCategory == category.CategoryId ? "is-active" : "")">
+                                    @category.Name <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </aside>
+        </div>
     </div>
-}
+</section>
+
+<partial name="_JoinNow" />

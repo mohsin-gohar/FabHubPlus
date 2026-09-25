@@ -74,7 +74,10 @@ public class NewsController : Controller
                 .Take(3)
                 .ToListAsync(),
             IsBookmarked = user is not null &&
-                           await _bookmarks.IsBookmarkedAsync(user.Id, BookmarkType.Article, id)
+                           await _bookmarks.IsBookmarkedAsync(user.Id, BookmarkType.Article, id),
+            Categories = await _categories.Query()
+                .OrderBy(c => c.Name)
+                .ToListAsync()
         };
 
         return View(vm);

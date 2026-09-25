@@ -12,3 +12,12 @@ public class MerchViewModel
     public int? CategoryId { get; set; }
     public bool? Upcoming { get; set; }
 }
+
+// Merchandise detail: the product, its siblings and the fandom rail.
+public class MerchDetailViewModel
+{
+    public MerchandiseItem Item { get; set; } = null!;
+    public List<MerchandiseItem> Related { get; set; } = new();
+    public List<Category> Categories { get; set; } = new();
+    public bool IsBookmarked { get; set; }
+}

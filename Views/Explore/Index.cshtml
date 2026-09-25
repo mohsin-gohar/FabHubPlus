@@ -1,97 +1,138 @@
 @model ExploreViewModel
 @{
     ViewData["Title"] = "Explore";
-    var crumbs = new List<BreadcrumbItem> { new("Explore") };
-}
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Explore") };
 
-<partial name="_Breadcrumbs" model="crumbs" />
-
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="page-title h3 mb-0">🔎 Explore content</h1>
-    <span class="text-muted small">@Model.TotalItems item(s) found</span>
-</div>
-
-@* ---------------- Filters ---------------- *@
-<form method="get" class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label small">Search</label>
-                <input type="text" name="search" value="@Model.Search" class="form-control"
-                       placeholder="Title, genre or description..." />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small">Category</label>
-                <select name="categoryId" class="form-select">
-                    <option value="">All fandoms</option>
-                    @foreach (var c in Model.Categories)
-                    {
-                        <option value="@c.CategoryId" selected="@(Model.CategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Type</label>
-                <select name="type" class="form-select">
-                    <option value="">All types</option>
-                    @foreach (var t in Enum.GetValues<ContentType>())
-                    {
-                        <option value="@t" selected="@(Model.Type == t ? "selected" : null)">@t</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small">Sort by</label>
-                <select name="sort" class="form-select">
-                    <option value="popular" selected="@(Model.Sort == "popular" ? "selected" : null)">Popularity</option>
-                    <option value="newest" selected="@(Model.Sort == "newest" ? "selected" : null)">Newest</option>
-                    <option value="views" selected="@(Model.Sort == "views" ? "selected" : null)">Most viewed</option>
-                    <option value="title" selected="@(Model.Sort == "title" ? "selected" : null)">Title A–Z</option>
-                </select>
-            </div>
-            <div class="col-md-1 d-grid">
-                <button class="btn btn-primary" type="submit">Go</button>
-            </div>
-        </div>
-    </div>
-</form>
-
-@* ---------------- Results ---------------- *@
-<div class="row g-3 mb-4">
-    @foreach (var item in Model.Items)
+    var sorts = new (string Value, string Label)[]
     {
-        <div class="col-6 col-md-4 col-lg-3">
-            <partial name="_ContentCard" model="item" />
+        ("popular", "Most Popular"),
+        ("newest", "Newest First"),
+        ("views", "Most Viewed"),
+        ("title", "Title A-Z"),
+    };
+    var hasFilters = !string.IsNullOrWhiteSpace(Model.Search)
+                     || Model.CategoryId is > 0
+                     || Model.Type is not null
+                     || Model.Sort != "popular";
+}
+
+<partial name="_PageBanner" model="trail" />
+
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+
+            <div>
+                <div class="fhp-panel fhp-panel--flush">
+                    <h1 class="fhp-panel__title">Find your next obsession</h1>
+                    <form method="get" class="fhp-form" role="search">
+                        <div class="fhp-field">
+                            <label class="fhp-field__label" for="exploreSearch">Search</label>
+                            <input id="exploreSearch" type="search" name="search" value="@Model.Search"
+                                   class="form-control form-input" placeholder="Title, genre or keyword" />
+                        </div>
+                        <div class="fhp-grid fhp-grid--2">
+                            <div class="fhp-field">
+                                <label class="fhp-field__label" for="exploreCategory">Fandom</label>
+                                <select id="exploreCategory" name="categoryId" class="form-select form-input">
+                                    <option value="">All fandoms</option>
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <option value="@category.CategoryId" selected="@(Model.CategoryId == category.CategoryId)">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="fhp-field">
+                                <label class="fhp-field__label" for="exploreType">Type</label>
+                                <select id="exploreType" name="type" class="form-select form-input">
+                                    <option value="">All types</option>
+                                    @foreach (var type in Enum.GetValues<ContentType>())
+                                    {
+                                        <option value="@type" selected="@(Model.Type == type)">@type</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="fhp-field">
+                                <label class="fhp-field__label" for="exploreSort">Sort by</label>
+                                <select id="exploreSort" name="sort" class="form-select form-input">
+                                    @foreach (var (value, label) in sorts)
+                                    {
+                                        <option value="@value" selected="@(Model.Sort == value)">@label</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="fhp-field fhp-field--action">
+                                <button type="submit" class="fhp-btn fhp-btn--primary fhp-btn--block">Apply filters</button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="fhp-hint">
+                        @Model.TotalItems @(Model.TotalItems == 1 ? "title" : "titles") found
+                        @if (hasFilters)
+                        {
+                            <span>&middot; <a class="fhp-link-strong" asp-controller="Explore" asp-action="Index">Clear all</a></span>
+                        }
+                    </p>
+                </div>
+                @if (Model.Items.Count == 0)
+                {
+                    <div class="fhp-empty">
+                        <h2 class="fhp-empty__title">Nothing here yet</h2>
+                        <p>No titles match those filters. Try a broader search or clear the filters.</p>
+                        <a class="fhp-btn fhp-btn--primary" asp-controller="Explore" asp-action="Index">Browse everything</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="fhp-grid fhp-grid--3 fhp-mt-25">
+                        @foreach (var item in Model.Items)
+                        {
+                            <partial name="_ContentCard" model="item" />
+                        }
+                    </div>
+                    <partial name="_Pager" model="new {
+                        Page = Model.Page,
+                        TotalPages = Model.TotalPages,
+                        UrlFor = (Func<int, string>)(p => Model.PageUrl(p)) }" />
+                }
+            </div>
+
+            @* ---- sticky fandom rail ---- *@
+            <aside class="fhp-aside" aria-label="Fandom navigation">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Browse fandoms</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Explore" asp-action="Index" class="@(Model.CategoryId is null ? "is-active" : "")">
+                                All titles <span>@Model.TotalItems</span>
+                            </a>
+                        </li>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <li>
+                                <a asp-controller="Explore" asp-action="Index" asp-route-categoryId="@category.CategoryId"
+                                   class="@(Model.CategoryId == category.CategoryId ? "is-active" : "")">
+                                    @category.Name <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <h2 class="fhp-side-title fhp-mt-25">Quick filters</h2>
+                    <div class="fhp-chips">
+                        @foreach (var type in Enum.GetValues<ContentType>())
+                        {
+                            <a class="fhp-chip @(Model.Type == type ? "is-active" : "")"
+                               asp-controller="Explore" asp-action="Index"
+                               asp-route-categoryId="@Model.CategoryId"
+                               asp-route-type="@type">@type</a>
+                        }
+                    </div>
+                </div>
+            </aside>
         </div>
-    }
-</div>
-
-@if (Model.Items.Count == 0)
-{
-    <div class="empty-state">
-        <div style="font-size:3rem;">🕳</div>
-        <p>No content matches your filters. Try a different keyword or category.</p>
-        <a asp-action="Index" class="btn btn-outline-primary btn-sm">Clear filters</a>
     </div>
-}
+</section>
 
-@* ---------------- Pagination ---------------- *@
-@if (Model.TotalPages > 1)
-{
-    <nav aria-label="Explorer pages">
-        <ul class="pagination justify-content-center">
-            <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
-                <a class="page-link" href="@Model.PageUrl(Math.Max(1, Model.Page - 1))">« Prev</a>
-            </li>
-            @for (var p = 1; p <= Model.TotalPages; p++)
-            {
-                <li class="page-item @(p == Model.Page ? "active" : "")">
-                    <a class="page-link" href="@Model.PageUrl(p)">@p</a>
-                </li>
-            }
-            <li class="page-item @(Model.HasNext ? "" : "disabled")">
-                <a class="page-link" href="@Model.PageUrl(Model.Page + 1)">Next »</a>
-            </li>
-        </ul>
-    </nav>
-}
+<partial name="_JoinNow" />

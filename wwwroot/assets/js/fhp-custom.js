@@ -66,6 +66,74 @@
 		scrollCue.init();
 	}
 
+	// Swiper Sliders
+	// Every slider is initialised only when its element exists, so one page can
+	// never break another page (the theme's custom.js called them unguarded).
+	if (typeof Swiper !== "undefined") {
+		const exists = (selector) => document.querySelector(selector) !== null;
+
+		// Hero banner + its thumbnail slider
+		if (exists(".bannerSwiper")) {
+			let bannerThumbs = null;
+			if (exists(".bannerSwiperThumbs")) {
+				bannerThumbs = new Swiper(".bannerSwiperThumbs", {
+					loop: true,
+					freeMode: true,
+					slidesPerView: 2,
+					spaceBetween: 20,
+					watchSlidesProgress: true
+				});
+			}
+			const bannerOptions = {
+				loop: true,
+				parallax: true,
+				effect: "fade",
+				autoHeight: true,
+				slidesPerView: 1,
+				fadeEffect: { crossFade: true },
+				autoplay: { delay: 3500, disableOnInteraction: false }
+			};
+			if (bannerThumbs) {
+				bannerOptions.thumbs = { swiper: bannerThumbs };
+			}
+			new Swiper(".bannerSwiper", bannerOptions);
+		}
+
+		// Live shows / upcoming events strip
+		if (exists(".liveShowsSwiper")) {
+			new Swiper(".liveShowsSwiper", {
+				loop: true,
+				slidesPerView: 1,
+				spaceBetween: 25,
+				autoplay: { delay: 3500, disableOnInteraction: false },
+				breakpoints: {
+					640: { slidesPerView: 2 },
+					720: { slidesPerView: 2 },
+					1024: { slidesPerView: 3 },
+					1280: { slidesPerView: 4 },
+					1536: { slidesPerView: 5 }
+				}
+			});
+		}
+
+		// Fan feedback / testimonials
+		if (exists(".feedbackSwiper")) {
+			new Swiper(".feedbackSwiper", {
+				loop: true,
+				slidesPerView: 1,
+				spaceBetween: 25,
+				autoplay: { delay: 3500, disableOnInteraction: false },
+				navigation: {
+					nextEl: ".feedback-button-next",
+					prevEl: ".feedback-button-prev"
+				},
+				breakpoints: {
+					1280: { slidesPerView: 2, spaceBetween: 140 }
+				}
+			});
+		}
+	}
+
 	// Counter
 	if ("IntersectionObserver" in window) {
         let counterObserver = new IntersectionObserver(function (entries, observer) {
@@ -111,22 +179,32 @@
 	});
 
 	// Accordion
+	// Supports both the component markup (.fhp-accordion__*) and the original
+	// Misao markup (.accordion-*), so any page can use either vocabulary.
 	const accordion = document.getElementById("accordion");
 	if (accordion) {
-		const items = accordion.querySelectorAll(".accordion-item");
+		const items = accordion.querySelectorAll(".accordion-item, .fhp-accordion__item");
+		const panelOf = (item) => item.querySelector(".accordion-panel, .fhp-accordion__panel");
+		const setOpen = (item, open) => {
+			item.classList.toggle("active", open);
+			item.classList.toggle("is-active", open);
+			const panel = panelOf(item);
+			if (panel) {
+				panel.classList.toggle("hidden", !open);
+				panel.classList.toggle("is-hidden", !open);
+			}
+		};
 		items.forEach(item => {
-			const toggle = item.querySelector(".accordion-toggle");
+			const toggle = item.querySelector(".accordion-toggle, .fhp-accordion__btn");
+			if (!toggle) return;
 			toggle.addEventListener("click", () => {
-				// Close all items
-				items.forEach(i => {
-					i.classList.remove("active");
-					i.querySelector(".accordion-panel").classList.add("hidden");
-				});
-				// Open the clicked item
-				item.classList.add("active");
-				item.querySelector(".accordion-panel").classList.remove("hidden");
+				const willOpen = !item.classList.contains("is-active") && !item.classList.contains("active");
+				items.forEach(i => setOpen(i, false));
+				if (willOpen) setOpen(item, true);
 			});
 		});
+		// Open the first entry by default so the panel never looks empty.
+		if (items.length) setOpen(items[0], true);
 	}
 
 	// Tabs

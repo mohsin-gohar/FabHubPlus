@@ -1,0 +1,22 @@
+@* Closing call-to-action shared by every page template.
+   Kept in one place so the rhythm (red panel, rotating seal, black bed)
+   is identical on the home page and on every inner page. *@
+<section class="fhp-cta fhp-section--tight">
+    <div class="container">
+        <div class="fhp-cta__inner">
+            <div class="fhp-cta__copy">
+                <h2 class="fhp-cta__title text_animation">Join FanHubPlus And Explore Endless Fandoms</h2>
+                <a asp-controller="Account" asp-action="Register" class="fhp-btn fhp-btn--secondary fhp-btn--lg">
+                    Join Now
+                </a>
+            </div>
+            <div class="fhp-cta__seal" data-cue="zoomIn">
+                <img src="/assets/images/icons/ico.svg" class="fhp-cta__seal-logo" alt="" width="72" height="72" loading="lazy" decoding="async" />
+                <a asp-controller="Account" asp-action="Register" class="fhp-cta__seal-link" aria-label="Create your free FanHubPlus account"></a>
+                <img src="/assets/images/icons/dashed-border.png" class="fhp-cta__seal-ring rotateme" alt="" width="200" height="200" loading="lazy" decoding="async" />
+            </div>
+            <div class="fhp-cta__veil" aria-hidden="true"></div>
+        </div>
+    </div>
+    <div class="fhp-cta__bed" aria-hidden="true"></div>
+</section>

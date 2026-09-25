@@ -1,56 +1,131 @@
 @model ArticleDetailViewModel
 @{
-    ViewData["Title"] = Model.Article.Title;
     var a = Model.Article;
-    var crumbs = new List<BreadcrumbItem> { new("News & Timeline", "/News"), new(a.Title) };
+    ViewData["Title"] = a.Title;
+    ViewData["fhpBanner"] = true;
+
+    var trail = new List<BreadcrumbItem>
+    {
+        new("News & Timeline", Url.Action("Index", "News")),
+        new(a.Category?.Name ?? "Story", Url.Action("Index", "News", new { categoryId = a.CategoryId })),
+        new(a.Title)
+    };
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="row g-4">
-    <div class="col-lg-8">
-        <article class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                    <span class="badge bg-primary rounded-pill">@a.Category.Name @(a.IsTimeline ? "· 🕰 Timeline" : "")</span>
-                    <button type="button"
-                            class="btn btn-outline-danger btn-sm bookmark-btn @(Model.IsBookmarked ? "active" : "")"
-                            data-type="@((int)BookmarkType.Article)" data-id="@a.ArticleId">
-                        @(Model.IsBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
-                    </button>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+            <article class="fhp-main-col">
+                <div class="fhp-panel fhp-panel--flush">
+                    <div class="fhp-detail-head">
+                        <div class="fhp-chips fhp-mb-15">
+                            <span class="fhp-chip fhp-chip--accent">@(a.IsTimeline ? "Timeline Story" : "News Bulletin")</span>
+                            @if (a.Category is not null)
+                            {
+                                <a class="fhp-chip" asp-controller="News" asp-action="Index" asp-route-categoryId="@a.CategoryId">
+                                    @a.Category.Name
+                                </a>
+                            }
+                        </div>
+
+                        <h1 class="fhp-title">@a.Title</h1>
+
+                        <div class="fhp-meta-rail">
+                            <div class="fhp-meta-item">
+                                <span class="fhp-meta-label">Published</span>
+                                <span class="fhp-meta-value">@a.PublishedAt.ToString("MMMM dd, yyyy")</span>
+                            </div>
+                            @if (a.Author is not null)
+                            {
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Author</span>
+                                    <span class="fhp-meta-value">@a.Author.Name</span>
+                                </div>
+                            }
+                            <div class="fhp-meta-item">
+                                <span class="fhp-meta-label">Fandom</span>
+                                <span class="fhp-meta-value">@(a.Category?.Name ?? "Universal")</span>
+                            </div>
+                        </div>
+
+                        <div class="fhp-action-bar fhp-mt-20">
+                            <button type="button"
+                                    class="fhp-btn fhp-btn--ghost bookmark-btn @(Model.IsBookmarked ? "is-active" : "")"
+                                    data-type="@((int)BookmarkType.Article)"
+                                    data-id="@a.ArticleId"
+                                    aria-label="Bookmark this article">
+                                <i class="@(Model.IsBookmarked ? "ri-heart-fill text-danger" : "ri-heart-line")" aria-hidden="true"></i>
+                                <span>@(Model.IsBookmarked ? "Saved" : "Save story")</span>
+                            </button>
+                            <button type="button"
+                                    class="fhp-btn fhp-btn--ghost share-btn"
+                                    data-title="@a.Title"
+                                    data-text="@a.Title"
+                                    aria-label="Share this story">
+                                <i class="ri-share-forward-line" aria-hidden="true"></i>
+                                <span>Share</span>
+                            </button>
+                            <a class="fhp-btn fhp-btn--ghost" asp-controller="News" asp-action="Index">
+                                <i class="ri-arrow-left-line" aria-hidden="true"></i>
+                                <span>All stories</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="fhp-prose fhp-mt-30">
+                        @Html.Raw(a.Body)
+                    </div>
                 </div>
 
-                <h1 class="page-title mb-2">@a.Title</h1>
-                <div class="text-muted small mb-4">
-                    📅 @a.PublishedAt.ToString("MMMM d, yyyy")
-                    @(a.Author is not null ? " · ✍ " + a.Author.Name : "")
+                @if (Model.Related.Count > 0)
+                {
+                    <div class="fhp-mt-40">
+                        <div class="fhp-sec-head">
+                            <span class="fhp-sub">Keep reading</span>
+                            <h2 class="fhp-sec-head__title">Related stories</h2>
+                        </div>
+                        <div class="fhp-grid fhp-grid--2 fhp-mt-20">
+                            @foreach (var related in Model.Related)
+                            {
+                                <partial name="_ArticleCard" model="related" />
+                            }
+                        </div>
+                    </div>
+                }
+            </article>
+
+            <aside class="fhp-aside" aria-label="News navigation">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Search stories</h2>
+                    <form class="fhp-search fhp-mb-25" method="get" asp-controller="News" asp-action="Index" role="search">
+                        <label class="fhp-sr" for="newsSearch">Search news</label>
+                        <input id="newsSearch" type="search" name="search" placeholder="Headline, keyword..." />
+                        <button type="submit"><i class="ri-search-line" aria-hidden="true"></i><span class="fhp-sr">Search</span></button>
+                    </form>
+
+                    <h2 class="fhp-side-title">Fandom desks</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="News" asp-action="Index">
+                                All coverage <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <li>
+                                <a asp-controller="News" asp-action="Index" asp-route-categoryId="@cat.CategoryId"
+                                   class="@(a.CategoryId == cat.CategoryId ? "is-active" : "")">
+                                    @cat.Name <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </div>
-
-                @* Admin-authored HTML is trusted (only admins can write articles) *@
-                <div class="article-body">
-                    @Html.Raw(a.Body)
-                </div>
-            </div>
-        </article>
-
-        <a asp-action="Index" class="btn btn-outline-secondary mt-3">← Back to news</a>
-    </div>
-
-    <div class="col-lg-4">
-        <h2 class="section-title h6 mb-3">Related articles</h2>
-        <div class="list-group shadow-sm">
-            @foreach (var r in Model.Related)
-            {
-                <a asp-action="Details" asp-route-id="@r.ArticleId"
-                   class="list-group-item list-group-item-action">
-                    <div class="fw-semibold small">@r.Title</div>
-                    <div class="text-muted" style="font-size:.75rem;">@r.PublishedAt.ToString("MMM d, yyyy")</div>
-                </a>
-            }
-            @if (Model.Related.Count == 0)
-            {
-                <div class="list-group-item empty-state py-4">No related articles.</div>
-            }
+            </aside>
         </div>
     </div>
-</div>
+</section>
+
+<partial name="_JoinNow" />

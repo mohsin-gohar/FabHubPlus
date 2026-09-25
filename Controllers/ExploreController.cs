@@ -115,6 +115,9 @@ public class ExploreController : Controller
                 .Where(c => c.CategoryId == content.CategoryId && c.ContentId != id)
                 .OrderByDescending(c => c.PopularityScore)
                 .Take(4)
+                .ToListAsync(),
+            Categories = await _categories.Query()
+                .OrderBy(c => c.Name)
                 .ToListAsync()
         };
 

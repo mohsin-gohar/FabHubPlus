@@ -1,72 +1,78 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Sign In") };
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-5 col-lg-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-1 page-title">Welcome back 👋</h1>
-                <p class="text-muted small mb-3">Sign in to rate, bookmark and submit fan art.</p>
+<partial name="_PageBanner" model="trail" />
+
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-auth">
+            <div class="fhp-panel fhp-panel--flush">
+                <h1 class="fhp-panel__title">Welcome back</h1>
+                <p class="fhp-hint mb-0 fhp-mb-25">Sign in to rate titles, bookmark favourites and publish fan art.</p>
 
                 @if (TempData["StatusMessage"] is string msg)
                 {
-                    <div class="alert alert-success py-2">@msg</div>
+                    <div class="alert alert-success" role="status">@msg</div>
                 }
                 @if (TempData["ForgotStatus"] is string status)
                 {
-                    <div class="alert alert-info py-2">@status</div>
+                    <div class="alert alert-info" role="status">@status</div>
                 }
                 @if (TempData["EmailPreviewLink"] is string link)
                 {
-                    <div class="alert alert-warning py-2 small">
-                        <strong>📧 SMTP is disabled — password reset link (demo):</strong><br />
-                        <a href="@link">@link</a>
+                    <div class="alert alert-warning" role="status">
+                        <strong>Demo mode:</strong> password reset link &mdash; <a href="@link">@link</a>
                     </div>
                 }
 
-                <form asp-action="Login" method="post" autocomplete="on">
+                <form asp-action="Login" method="post" class="fhp-form" autocomplete="on">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="ReturnUrl" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+                    <div asp-validation-summary="ModelOnly" class="fhp-field__error"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" placeholder="you@example.com" autofocus />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    <div class="fhp-field">
+                        <label asp-for="Email" class="fhp-field__label"></label>
+                        <input asp-for="Email" class="form-control form-input" placeholder="you@example.com" autofocus />
+                        <span asp-validation-for="Email" class="fhp-field__error"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" placeholder="••••••••" />
-                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    <div class="fhp-field">
+                        <label asp-for="Password" class="fhp-field__label"></label>
+                        <input asp-for="Password" class="form-control form-input" placeholder="Your password" />
+                        <span asp-validation-for="Password" class="fhp-field__error"></span>
                     </div>
-                    <div class="form-check mb-3">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    <div class="fhp-field fhp-field--check">
+                        <label class="fhp-check">
+                            <input asp-for="RememberMe" type="checkbox" class="form-check-input" />
+                            <span>@Html.DisplayNameFor(m => m.RememberMe)</span>
+                        </label>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-2">Sign in</button>
+                    <button type="submit" class="fhp-btn fhp-btn--primary fhp-btn--block">Sign in</button>
                 </form>
 
-                @* Forgot-password mini-form (posts to Account/ForgotPassword) *@
-                <form asp-action="ForgotPassword" method="post" class="mb-2">
+                <hr class="fhp-rule" />
+                <h2 class="fhp-side-title">Forgot your password?</h2>
+                <form asp-action="ForgotPassword" method="post" class="fhp-form">
                     @Html.AntiForgeryToken()
-                    <div class="input-group input-group-sm">
-                        <input type="email" name="Email" class="form-control" placeholder="E-mail for password reset" required />
-                        <button class="btn btn-outline-secondary" type="submit">Reset link</button>
+                    <div class="fhp-field">
+                        <label class="fhp-field__label" for="forgotEmail">Account e-mail</label>
+                        <input id="forgotEmail" type="email" name="Email" class="form-control form-input" placeholder="you@example.com" required />
                     </div>
+                    <button type="submit" class="fhp-btn fhp-btn--ghost fhp-btn--block">E-mail me a reset link</button>
                 </form>
 
-                <div class="small text-center text-muted">
-                    New here? <a asp-action="Register">Create an account</a>
-                </div>
-                <div class="small text-center text-muted mt-1">
-                    Demo: user@fanhubplus.com / User@123 · admin@fanhubplus.com / Admin@123
-                </div>
+                <p class="fhp-hint fhp-mt-20 mb-0">
+                    New to FanHubPlus? <a class="fhp-link-strong" asp-action="Register">Create an account</a>
+                </p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<partial name="_JoinNow" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

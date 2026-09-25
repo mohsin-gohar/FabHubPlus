@@ -1,34 +1,51 @@
-@* Reusable content card used by Home + Explorer grids (Misao theme style) *@
+@* Content card - the video-details card, used by Explore, related rows,
+   bookmarks and the home page. One component, one source of truth.
+   Fallback art is derived from the id, so a card always looks intentional
+   even when an admin has not uploaded a cover yet. *@
 @model FanHubPlus.Models.Entities.Content
 @{
-    var categoryName = Model.Category?.Name ?? "Uncategorized";
-    var description = Model.Description ?? string.Empty;
-    var descriptionPreview = description.Length > 90 ? description[..90] + "…" : description;
+    var cover = string.IsNullOrWhiteSpace(Model.ThumbnailUrl)
+        ? $"/assets/images/movies/movie{(Model.ContentId % 24) + 1}.jpg"
+        : Model.ThumbnailUrl;
+    var year = Model.ReleaseDate?.ToString("yyyy") ?? Model.CreatedAt.ToString("yyyy");
+    var views = Model.ViewCount >= 1000
+        ? (Model.ViewCount / 1000d).ToString("0.#") + "k"
+        : Model.ViewCount.ToString();
+    var dark = (bool?)ViewData["fhpDark"] == true;
 }
-
-<div class="fhp-card overflow-hidden">
-    <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="fhp-thumb">
-        @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
-        {
-            <img src="@Model.ThumbnailUrl" class="fhp-cover fhp-zoom" alt="@Model.Title" />
-        }
-        else
-        {
-            <div class="fhp-cover-fallback">@Model.Title</div>
-        }
-        <span class="fhp-badge fhp-badge-type">@Model.Type</span>
-        <span class="fhp-badge fhp-badge-views"><i class="ri-eye-line"></i> @Model.ViewCount</span>
-    </a>
-    <div class="p-[20px] text-center">
-        <h3 class="fhp-title text-base leading-none mb-[10px]">
-            <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId">@Model.Title</a>
-        </h3>
-        <p class="text-13 text-body/70 mb-[10px]">
-            @categoryName@(Model.Genre is { Length: > 0 } ? " · " + Model.Genre : "")
-        </p>
-        <p class="text-13 text-body/70 mb-[15px]">@descriptionPreview</p>
-        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="primary-btn block w-full">
-            <span>Open <i class="ri-arrow-right-line"></i></span>
+<article class="fhp-vcard @(dark ? "fhp-vcard--dark" : "")">
+    <div class="fhp-vcard__frame">
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" tabindex="-1" aria-hidden="true">
+            <img src="@cover" class="fhp-vcard__img" alt="@Model.Title" loading="lazy" decoding="async" width="400" height="250" />
         </a>
+
+        <div class="fhp-vcard__tools">
+            <button type="button" class="fhp-icon-btn bookmark-btn" title="Save to your list"
+                    aria-pressed="false" aria-label="Save @Model.Title to your list"
+                    data-type="@((int)BookmarkType.Content)" data-id="@Model.ContentId">
+                <i class="ri-heart-line" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="fhp-icon-btn fhp-share" title="Share"
+                    aria-label="Share @Model.Title"
+                    data-share-title="@Model.Title"
+                    data-share-url="@Url.Action("Details", "Explore", new { id = Model.ContentId })">
+                <i class="ri-share-line" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId"
+           class="fhp-vcard__play" aria-label="Open @Model.Title">
+            <i class="ri-play-fill" aria-hidden="true"></i>
+        </a>
+        <span class="fhp-vcard__badge">@views views</span>
     </div>
-</div>
+
+    <h3 class="fhp-vcard__title">
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId">@Model.Title</a>
+    </h3>
+    <ul class="fhp-rail">
+        <li>@year</li>
+        <li><span class="fhp-rail__sep" aria-hidden="true"></span></li>
+        <li><a asp-controller="Explore" asp-action="Index" asp-route-categoryId="@Model.CategoryId">@(Model.Category?.Name ?? "Fandom")</a></li>
+    </ul>
+</article>

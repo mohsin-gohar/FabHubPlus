@@ -1,53 +1,56 @@
 @model RegisterViewModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Create account";
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Sign Up") };
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h4 mb-1 page-title">Join Fan Hub Plus 🎉</h1>
-                <p class="text-muted small mb-3">
-                    Create a free account to rate content, build bookmark lists and publish fan art.
-                </p>
+<partial name="_PageBanner" model="trail" />
 
-                <form asp-action="Register" method="post">
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-auth">
+            <div class="fhp-panel fhp-panel--flush">
+                <h1 class="fhp-panel__title">Create your account</h1>
+                <p class="fhp-hint mb-0 fhp-mb-25">Rate titles, build fandom lists and share your art with the community.</p>
+
+                <form asp-action="Register" method="post" class="fhp-form">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+                    <div asp-validation-summary="ModelOnly" class="fhp-field__error"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label"></label>
-                        <input asp-for="Name" class="form-control" placeholder="Your display name" autofocus />
-                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    <div class="fhp-field">
+                        <label asp-for="Name" class="fhp-field__label"></label>
+                        <input asp-for="Name" class="form-control form-input" placeholder="How fans will see you" autofocus />
+                        <span asp-validation-for="Name" class="fhp-field__error"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" placeholder="you@example.com" />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    <div class="fhp-field">
+                        <label asp-for="Email" class="fhp-field__label"></label>
+                        <input asp-for="Email" class="form-control form-input" placeholder="you@example.com" />
+                        <span asp-validation-for="Email" class="fhp-field__error"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" placeholder="Min. 8 chars incl. symbol" />
-                        <span asp-validation-for="Password" class="text-danger small"></span>
-                        <div class="form-text">8+ characters with upper, lower, digit and symbol.</div>
+                    <div class="fhp-field">
+                        <label asp-for="Password" class="fhp-field__label"></label>
+                        <input asp-for="Password" class="form-control form-input" placeholder="At least 8 characters" />
+                        <p class="fhp-field__hint">Mix upper and lower case, a number and a symbol.</p>
+                        <span asp-validation-for="Password" class="fhp-field__error"></span>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="ConfirmPassword" class="form-label"></label>
-                        <input asp-for="ConfirmPassword" class="form-control" />
-                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    <div class="fhp-field">
+                        <label asp-for="ConfirmPassword" class="fhp-field__label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control form-input" placeholder="Repeat your password" />
+                        <span asp-validation-for="ConfirmPassword" class="fhp-field__error"></span>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Create account</button>
+                    <button type="submit" class="fhp-btn fhp-btn--primary fhp-btn--block">Create account</button>
                 </form>
 
-                <div class="small text-center text-muted mt-3">
-                    Already registered? <a asp-action="Login">Sign in</a>
-                </div>
+                <p class="fhp-hint fhp-mt-20 mb-0">
+                    Already registered? <a class="fhp-link-strong" asp-action="Login">Sign in</a>
+                </p>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<partial name="_JoinNow" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

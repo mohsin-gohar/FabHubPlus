@@ -1,0 +1,33 @@
+@* Merchandise card - shop template. Display only (no cart / payment),
+   so the hover action always goes to the detail page. *@
+@model FanHubPlus.Models.Entities.MerchandiseItem
+@{
+    var cover = string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? $"/assets/images/products/product{(Model.ItemId % 6) + 1}.jpg"
+        : Model.ImageUrl;
+    var status = Model.IsUpcoming
+        ? (Model.ReleaseDate is { } d ? "Drops " + d.ToString("dd MMM yyyy") : "Coming soon")
+        : "Available now";
+    var dark = (bool?)ViewData["fhpDark"] == true;
+}
+<article class="fhp-scard @(dark ? "fhp-scard--dark" : "")">
+    <div class="fhp-scard__frame">
+        <a asp-controller="Merch" asp-action="Details" asp-route-id="@Model.ItemId" tabindex="-1" aria-hidden="true">
+            <img src="@cover" class="fhp-scard__img" alt="@Model.Name" loading="lazy" decoding="async" width="360" height="360" />
+        </a>
+        <a asp-controller="Merch" asp-action="Details" asp-route-id="@Model.ItemId" class="fhp-btn fhp-btn--secondary fhp-btn--sm fhp-scard__hover">
+            View Details
+        </a>
+        @if (Model.IsUpcoming)
+        {
+            <span class="fhp-bcard__cat">Pre-order</span>
+        }
+    </div>
+    <div class="fhp-scard__head">
+        <h3 class="fhp-scard__name">
+            <a asp-controller="Merch" asp-action="Details" asp-route-id="@Model.ItemId">@Model.Name</a>
+        </h3>
+        <span class="fhp-scard__tag">@Model.Tag</span>
+    </div>
+    <p class="fhp-hint">@(Model.Category?.Name ?? "Merch") &middot; @status</p>
+</article>

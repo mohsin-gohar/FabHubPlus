@@ -1,61 +1,162 @@
-@model FanHubPlus.Models.Entities.MerchandiseItem
+@model MerchDetailViewModel
 @{
-    ViewData["Title"] = Model.Name;
-    var isBookmarked = (bool?)ViewBag.IsBookmarked == true;
-    var crumbs = new List<BreadcrumbItem> { new("Merchandise", "/Merch"), new(Model.Name) };
+    var item = Model.Item;
+    ViewData["Title"] = item.Name;
+    ViewData["fhpBanner"] = true;
+
+    var trail = new List<BreadcrumbItem>
+    {
+        new("Merchandise", Url.Action("Index", "Merch")),
+        new(item.Category?.Name ?? "Merch", Url.Action("Index", "Merch", new { categoryId = item.CategoryId })),
+        new(item.Name)
+    };
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="row g-4">
-    <div class="col-md-5">
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded shadow-sm" />
-        }
-        else
-        {
-            <div class="cover-fallback rounded shadow-sm" style="height:340px;">🛍 @Model.Name</div>
-        }
-    </div>
-    <div class="col-md-7">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start">
-                    <h1 class="h2 page-title mb-1">@Model.Name</h1>
-                    @if (Model.Tag != MerchTag.None)
-                    {
-                        <span class="badge bg-warning text-dark rounded-pill">@Model.Tag</span>
-                    }
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+            <article class="fhp-main-col">
+                <div class="fhp-panel fhp-panel--flush">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-5">
+                            <div class="fhp-detail-poster">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.Name" />
+                                }
+                                else
+                                {
+                                    <div class="fhp-detail-poster__fallback">
+                                        <i class="ri-shopping-bag-3-line" aria-hidden="true"></i>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <div class="fhp-chips fhp-mb-15">
+                                @if (item.IsUpcoming)
+                                {
+                                    <span class="fhp-chip fhp-chip--accent">Upcoming Drop</span>
+                                }
+                                @if (item.Tag != MerchTag.None)
+                                {
+                                    <span class="fhp-chip">@item.Tag</span>
+                                }
+                                @if (item.Category is not null)
+                                {
+                                    <a class="fhp-chip" asp-controller="Merch" asp-action="Index" asp-route-categoryId="@item.CategoryId">
+                                        @item.Category.Name
+                                    </a>
+                                }
+                            </div>
+
+                            <h1 class="fhp-title">@item.Name</h1>
+
+                            <div class="fhp-meta-rail fhp-mt-20">
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Status</span>
+                                    <span class="fhp-meta-value">@(item.IsUpcoming ? "Pre-order" : "In circulation")</span>
+                                </div>
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Fandom</span>
+                                    <span class="fhp-meta-value">@(item.Category?.Name ?? "Universal")</span>
+                                </div>
+                                @if (item.ReleaseDate is not null)
+                                {
+                                    <div class="fhp-meta-item">
+                                        <span class="fhp-meta-label">Release</span>
+                                        <span class="fhp-meta-value">@item.ReleaseDate.Value.ToString("MMMM dd, yyyy")</span>
+                                    </div>
+                                }
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Views</span>
+                                    <span class="fhp-meta-value">@item.ViewCount</span>
+                                </div>
+                            </div>
+
+                            <div class="fhp-action-bar fhp-mt-25">
+                                <button type="button"
+                                        class="fhp-btn fhp-btn--primary bookmark-btn @(Model.IsBookmarked ? "is-active" : "")"
+                                        data-type="@((int)BookmarkType.Merchandise)"
+                                        data-id="@item.ItemId"
+                                        aria-label="Wishlist this merchandise item">
+                                    <i class="@(Model.IsBookmarked ? "ri-heart-fill" : "ri-heart-line")" aria-hidden="true"></i>
+                                    <span>@(Model.IsBookmarked ? "On Wishlist" : "Add to Wishlist")</span>
+                                </button>
+                                <button type="button"
+                                        class="fhp-btn fhp-btn--ghost share-btn"
+                                        data-title="@item.Name"
+                                        data-text="Check out @item.Name on FanHubPlus"
+                                        aria-label="Share this merchandise">
+                                    <i class="ri-share-forward-line" aria-hidden="true"></i>
+                                    <span>Share</span>
+                                </button>
+                                <a class="fhp-btn fhp-btn--ghost" asp-controller="Merch" asp-action="Index">
+                                    <i class="ri-arrow-left-line" aria-hidden="true"></i>
+                                    <span>All merch</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fhp-notice fhp-mt-30">
+                        <i class="ri-information-line" aria-hidden="true"></i>
+                        <div>
+                            <strong>Display Showcase Only:</strong> FanHubPlus is a community catalog and wish-listing hub. Purchases, checkout, and inventory fulfillment are handled exclusively by official partner stores.
+                        </div>
+                    </div>
                 </div>
 
-                <div class="text-muted mb-3">
-                    📂 @Model.Category.Name
-                    @if (Model.IsUpcoming)
-                    {
-                        <span> · 🚀 Upcoming @(Model.ReleaseDate is not null ? "· " + Model.ReleaseDate.Value.ToString("MMMM d, yyyy") : "")</span>
-                    }
-                </div>
+                @if (Model.Related.Count > 0)
+                {
+                    <div class="fhp-mt-40">
+                        <div class="fhp-sec-head">
+                            <span class="fhp-sub">Related collectibles</span>
+                            <h2 class="fhp-sec-head__title">More from this fandom</h2>
+                        </div>
+                        <div class="fhp-grid fhp-grid--2 fhp-mt-20">
+                            @foreach (var related in Model.Related)
+                            {
+                                <partial name="_MerchCard" model="related" />
+                            }
+                        </div>
+                    </div>
+                }
+            </article>
 
-                <div class="d-flex gap-3 small text-muted mb-3">
-                    <span>👁 @Model.ViewCount views</span>
-                    <span class="badge bg-info text-dark">Showcase only</span>
-                </div>
+            <aside class="fhp-aside" aria-label="Merch navigation">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Search merch</h2>
+                    <form class="fhp-search fhp-mb-25" method="get" asp-controller="Merch" asp-action="Index" role="search">
+                        <label class="fhp-sr" for="merchDetailSearch">Search store</label>
+                        <input id="merchDetailSearch" type="search" name="search" placeholder="Collectible, apparel..." />
+                        <button type="submit"><i class="ri-search-line" aria-hidden="true"></i><span class="fhp-sr">Search</span></button>
+                    </form>
 
-                <p class="text-muted">
-                    This item is part of the Fan Hub Plus showcase — browsing and wish-listing only,
-                    payments are not handled by this portal.
-                </p>
-
-                <div class="d-flex gap-2">
-                    <button type="button"
-                            class="btn btn-outline-danger bookmark-btn @(isBookmarked ? "active" : "")"
-                            data-type="@((int)BookmarkType.Merchandise)" data-id="@Model.ItemId">
-                        @(isBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
-                    </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">← Back to merch</a>
+                    <h2 class="fhp-side-title">Fandom drops</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Merch" asp-action="Index">
+                                All collections <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <li>
+                                <a asp-controller="Merch" asp-action="Index" asp-route-categoryId="@cat.CategoryId"
+                                   class="@(item.CategoryId == cat.CategoryId ? "is-active" : "")">
+                                    @cat.Name <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </div>
-            </div>
+            </aside>
         </div>
     </div>
-</div>
+</section>
+
+<partial name="_JoinNow" />

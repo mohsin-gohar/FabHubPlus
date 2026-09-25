@@ -222,6 +222,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BbGVydHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_ArticleCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BcnRpY2xlQ2FyZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_Breadcrumbs.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9CcmVhZGNydW1icy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -234,8 +238,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Db250ZW50Q2FyZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_JoinNow.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Kb2luTm93LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_MerchCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9NZXJjaENhcmQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_PageBanner.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9QYWdlQmFubmVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_Pager.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9QYWdlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_ValidationScriptsPartial.cshtml]

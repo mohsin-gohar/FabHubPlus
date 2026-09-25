@@ -74,6 +74,7 @@ public class CharactersController : Controller
         {
             Character = character,
             RelatedContent = await _contents.Query()
+                .Include(c => c.Category)
                 .Where(c => c.CategoryId == character.CategoryId)
                 .OrderByDescending(c => c.PopularityScore)
                 .Take(4)

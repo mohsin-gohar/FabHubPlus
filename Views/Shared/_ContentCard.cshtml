@@ -1,5 +1,11 @@
 @* Reusable content card used by Home + Explorer grids *@
 @model FanHubPlus.Models.Entities.Content
+@{
+    var categoryName = Model.Category?.Name ?? "Uncategorized";
+    var description = Model.Description ?? string.Empty;
+    var descriptionPreview = description.Length > 90 ? description[..90] + "…" : description;
+}
+
 <div class="card content-card h-100 border-0 shadow-sm">
     @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
     {
@@ -18,11 +24,9 @@
             <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="text-reset">@Model.Title</a>
         </h6>
         <div class="small text-muted mb-2">
-            @Model.Category.Name@(Model.Genre is { Length: > 0 } ? " · " + Model.Genre : "")
+            @categoryName@(Model.Genre is { Length: > 0 } ? " · " + Model.Genre : "")
         </div>
-        <p class="small text-muted flex-grow-1 mb-2">
-            @((Model.Description ?? "").Length > 90 ? Model.Description[..90] + "…" : Model.Description)
-        </p>
+        <p class="small text-muted flex-grow-1 mb-2">@descriptionPreview</p>
         <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId"
            class="btn btn-sm btn-outline-primary mt-auto">Open ▸</a>
     </div>

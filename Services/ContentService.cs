@@ -74,6 +74,7 @@ public class ContentService : IContentService
 
     public Task<List<Content>> GetTrendingAsync(int count)
         => _contents.Query()
+            .Include(c => c.Category)
             .OrderByDescending(c => c.PopularityScore)
             .ThenByDescending(c => c.ViewCount)
             .Take(count)

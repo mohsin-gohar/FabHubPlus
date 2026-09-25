@@ -111,6 +111,7 @@ public class ExploreController : Controller
             AverageRating = stars.Count == 0 ? 0 : Math.Round(stars.Average(), 1),
             RatingCount = stars.Count,
             Related = await _contents.Query()
+                .Include(c => c.Category)
                 .Where(c => c.CategoryId == content.CategoryId && c.ContentId != id)
                 .OrderByDescending(c => c.PopularityScore)
                 .Take(4)

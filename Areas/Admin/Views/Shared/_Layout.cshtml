@@ -1,81 +1,128 @@
 @using System.Text.RegularExpressions
 @{
-    // Admin area master layout: fixed sidebar + top bar. Shares theme cookie with the public site.
+    // Admin area master layout: top bar + fixed sidebar + main column.
+    // Like the public site the dashboard is locked to the Misao dark theme
+    // (data-theme-lock="dark"), so both shells read as one product. The shared
+    // fhp_pref cookie still drives the font-size preference.
     var pref = Context.Request.Cookies["fhp_pref"];
-    var dark = pref != null && pref.StartsWith("1");
     var fontMatch = Regex.Match(pref ?? "", @"\|(\d+)$");
     var fontPx = fontMatch.Success ? fontMatch.Groups[1].Value : "16";
     var userName = User.Identity?.Name ?? "";
+    var userInitial = string.IsNullOrEmpty(userName) ? "?" : userName.Substring(0, 1).ToUpperInvariant();
     var path = Context.Request.Path.Value ?? "";
     bool IsActive(string controller) =>
         path.StartsWith($"/Admin/{controller}", StringComparison.OrdinalIgnoreCase);
 }
 <!DOCTYPE html>
-<html lang="en" class="@(dark ? "dark-mode" : null)" style="font-size: @(fontPx)px">
+<html lang="en" dir="ltr" class="dark-mode" data-theme-lock="dark"
+      style="font-size: @(fontPx)px">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " · " : "")Admin · Fan Hub Plus</title>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " · " : "")Admin · FanHubPlus</title>
+
+    @* ---------- Same Misao assets the public shell loads ---------- *@
+    <link rel="stylesheet" href="~/assets/css/remixicon.css" />
+    @* ---------- Bootstrap (grid + widgets the admin forms/tables rely on) ---------- *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* ---------- FanHubPlus bridge (Misao palette + the fhp- vocabulary) ---------- *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link rel="icon" type="image/png" href="~/assets/images/favicon.ico" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/" />
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montez&amp;family=Montserrat:ital,wght@0,100..900;1,100..900&amp;family=Play:wght@400;700&amp;display=swap" rel="stylesheet" />
 </head>
-<body>
+<body class="fhp-admin-body">
     @* ---- Top bar ---- *@
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
-        <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">🛠 FanHub Admin</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="adminNav">
-            <ul class="navbar-nav me-auto"></ul>
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-outline-light btn-sm" onclick="fhpToggleTheme()" id="themeToggle">🌙</button>
-                <a class="btn btn-outline-light btn-sm" asp-area="" asp-controller="Home" asp-action="Index">🌍 View site</a>
-                <span class="text-white small">👤 @userName</span>
-                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                    <button type="submit" class="btn btn-light btn-sm">Sign out</button>
-                </form>
-            </div>
+    <header class="fhp-admin-topbar">
+        <a class="fhp-admin-brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+            <span class="fhp-admin-brand__mark">FH</span>
+            <span class="fhp-admin-brand__text">
+                FanHub<em>Plus</em>
+                <small>Control panel</small>
+            </span>
+        </a>
+
+        <div class="fhp-admin-actions">
+            <a class="fhp-admin-btn" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="ri-external-link-line" aria-hidden="true"></i>
+                <span>View site</span>
+            </a>
+            <span class="fhp-admin-user">
+                <span class="avatar">@userInitial</span>
+                <span class="fhp-admin-user__name">@userName</span>
+            </span>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="fhp-admin-btn fhp-admin-btn--solid">
+                    <i class="ri-logout-box-r-line" aria-hidden="true"></i>
+                    <span>Sign out</span>
+                </button>
+            </form>
         </div>
-    </nav>
+    </header>
 
-    <div class="admin-shell">
+    <div class="fhp-admin-shell">
         @* ---- Sidebar ---- *@
-        <aside class="admin-sidebar">
-            <div class="side-title">Overview</div>
-            <a class="@(IsActive("Dashboard") || path == "/Admin" ? "active" : "")"
-               asp-area="Admin" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+        <aside class="fhp-admin-side">
+            <nav class="fhp-admin-nav" aria-label="Admin sections">
+                <div class="fhp-admin-side-title">Overview</div>
+                <a class="fhp-admin-side-link @(IsActive("Dashboard") || path == "/Admin" ? "active" : "")"
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="ri-dashboard-2-line" aria-hidden="true"></i><span>Dashboard</span>
+                </a>
 
-            <div class="side-title">Content</div>
-            <a class="@(IsActive("Contents") ? "active" : "")"
-               asp-area="Admin" asp-controller="Contents" asp-action="Index">🎬 Contents</a>
-            <a class="@(IsActive("Articles") ? "active" : "")"
-               asp-area="Admin" asp-controller="Articles" asp-action="Index">📰 Articles</a>
-            <a class="@(IsActive("Events") ? "active" : "")"
-               asp-area="Admin" asp-controller="Events" asp-action="Index">📅 Events</a>
-            <a class="@(IsActive("Characters") ? "active" : "")"
-               asp-area="Admin" asp-controller="Characters" asp-action="Index">🎭 Characters</a>
-            <a class="@(IsActive("Merch") ? "active" : "")"
-               asp-area="Admin" asp-controller="Merch" asp-action="Index">🛍 Merchandise</a>
-            <a class="@(IsActive("Categories") ? "active" : "")"
-               asp-area="Admin" asp-controller="Categories" asp-action="Index">🏷 Categories</a>
+                <div class="fhp-admin-side-title">Content</div>
+                <a class="fhp-admin-side-link @(IsActive("Contents") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Contents" asp-action="Index">
+                    <i class="ri-film-line" aria-hidden="true"></i><span>Contents</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Articles") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Articles" asp-action="Index">
+                    <i class="ri-newspaper-line" aria-hidden="true"></i><span>Articles</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Events") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Events" asp-action="Index">
+                    <i class="ri-calendar-event-line" aria-hidden="true"></i><span>Events</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Characters") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Characters" asp-action="Index">
+                    <i class="ri-contacts-book-2-line" aria-hidden="true"></i><span>Characters</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Merch") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Merch" asp-action="Index">
+                    <i class="ri-shirt-line" aria-hidden="true"></i><span>Merchandise</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Categories") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                    <i class="ri-price-tag-3-line" aria-hidden="true"></i><span>Categories</span>
+                </a>
 
-            <div class="side-title">Moderation</div>
-            <a class="@(IsActive("Feedback") ? "active" : "")"
-               asp-area="Admin" asp-controller="Feedback" asp-action="Index">💬 Feedback</a>
-            <a class="@(IsActive("Submissions") ? "active" : "")"
-               asp-area="Admin" asp-controller="Submissions" asp-action="Index">🖼 Submissions</a>
+                <div class="fhp-admin-side-title">Moderation</div>
+                <a class="fhp-admin-side-link @(IsActive("Feedback") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Feedback" asp-action="Index">
+                    <i class="ri-feedback-line" aria-hidden="true"></i><span>Feedback</span>
+                </a>
+                <a class="fhp-admin-side-link @(IsActive("Submissions") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Submissions" asp-action="Index">
+                    <i class="ri-image-2-line" aria-hidden="true"></i><span>Submissions</span>
+                </a>
 
-            <div class="side-title">System</div>
-            <a class="@(IsActive("Users") ? "active" : "")"
-               asp-area="Admin" asp-controller="Users" asp-action="Index">👥 Users</a>
+                <div class="fhp-admin-side-title">System</div>
+                <a class="fhp-admin-side-link @(IsActive("Users") ? "active" : "")"
+                   asp-area="Admin" asp-controller="Users" asp-action="Index">
+                    <i class="ri-group-line" aria-hidden="true"></i><span>Users</span>
+                </a>
+            </nav>
         </aside>
 
         @* ---- Main ---- *@
-        <div class="admin-main">
+        <main class="fhp-admin-main">
             <partial name="_Alerts" />
             @RenderBody()
-        </div>
+        </main>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

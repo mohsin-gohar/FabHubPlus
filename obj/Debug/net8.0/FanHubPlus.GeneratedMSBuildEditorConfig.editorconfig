@@ -226,8 +226,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BcnRpY2xlQ2FyZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_Breadcrumbs.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9CcmVhZGNydW1icy5jc2h0bWw=
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_ArtworkCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BcnR3b3JrQ2FyZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_CharacterCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9DaGFyYWN0ZXJDYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_ChatWidget.cshtml]

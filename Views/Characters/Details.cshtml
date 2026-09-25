@@ -1,52 +1,143 @@
 @model CharacterDetailViewModel
 @{
     ViewData["Title"] = Model.Character.Name;
+    ViewData["fhpBanner"] = true;
+
     var ch = Model.Character;
-    var crumbs = new List<BreadcrumbItem> { new("Characters", "/Characters"), new(ch.Name) };
+    var portrait = string.IsNullOrWhiteSpace(ch.ImageUrl)
+        ? $"/assets/images/categories/category{(ch.CharacterId % 7) + 1}.jpg"
+        : ch.ImageUrl;
+    var trail = new List<BreadcrumbItem>
+    {
+        new("Characters", Url.Action("Index", "Characters")),
+        new(ch.Category?.Name ?? "Cast", Url.Action("Index", "Characters", new { categoryId = ch.CategoryId })),
+        new(ch.Name),
+    };
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
-        @if (!string.IsNullOrEmpty(ch.ImageUrl))
-        {
-            <img src="@ch.ImageUrl" alt="@ch.Name" class="img-fluid rounded shadow-sm" />
-        }
-        else
-        {
-            <div class="cover-fallback rounded shadow-sm" style="height:320px;">@ch.Name</div>
-        }
-    </div>
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <h1 class="h2 page-title mb-1">@ch.Name</h1>
-                    <button type="button"
-                            class="btn btn-outline-danger bookmark-btn @(Model.IsBookmarked ? "active" : "")"
-                            data-type="@((int)BookmarkType.Character)" data-id="@ch.CharacterId">
-                        @(Model.IsBookmarked ? "♥ Bookmarked" : "♡ Bookmark")
-                    </button>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+
+            <div>
+                @* ---- portrait + identity, in the detail-head language ---- *@
+                <div class="fhp-panel fhp-panel--flush">
+                    <div class="fhp-grid fhp-grid--2 fhp-detail-head">
+                        <div class="fhp-detail-poster fhp-detail-poster--tall">
+                            <img src="@portrait" alt="@ch.Name" width="420" height="525" />
+                        </div>
+                        <div>
+                            <div class="fhp-chips fhp-mb-15">
+                                <span class="fhp-chip fhp-chip--yellow">@(ch.Fandom ?? "Original character")</span>
+                                @if (ch.Category is not null)
+                                {
+                                    <a class="fhp-chip" asp-controller="Characters" asp-action="Index" asp-route-categoryId="@ch.CategoryId">
+                                        @ch.Category.Name
+                                    </a>
+                                }
+                            </div>
+
+                            <h1 class="fhp-title">@ch.Name</h1>
+
+                            <div class="fhp-meta-rail fhp-mt-20">
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Fandom</span>
+                                    <span class="fhp-meta-value">@(ch.Fandom ?? "Unassigned")</span>
+                                </div>
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Category</span>
+                                    <span class="fhp-meta-value">@(ch.Category?.Name ?? "General")</span>
+                                </div>
+                                <div class="fhp-meta-item">
+                                    <span class="fhp-meta-label">Appearances</span>
+                                    <span class="fhp-meta-value">@Model.RelatedContent.Count title(s)</span>
+                                </div>
+                            </div>
+
+                            <div class="fhp-action-bar fhp-mt-25">
+                                <button type="button"
+                                        class="fhp-icon-btn fhp-icon-btn--dark bookmark-btn @(Model.IsBookmarked ? "is-saved" : "")"
+                                        data-type="@((int)BookmarkType.Character)"
+                                        data-id="@ch.CharacterId"
+                                        aria-pressed="@(Model.IsBookmarked ? "true" : "false")"
+                                        aria-label="Save @ch.Name to your list">
+                                    <i class="@(Model.IsBookmarked ? "ri-heart-fill" : "ri-heart-line")" aria-hidden="true"></i>
+                                </button>
+                                <button type="button"
+                                        class="fhp-icon-btn fhp-icon-btn--dark fhp-share"
+                                        data-share-title="@ch.Name"
+                                        data-share-url="@Url.Action("Details", "Characters", new { id = ch.CharacterId })"
+                                        aria-label="Share @ch.Name">
+                                    <i class="ri-share-forward-line" aria-hidden="true"></i>
+                                </button>
+                                <a class="fhp-btn fhp-btn--ghost" asp-controller="Characters" asp-action="Index">
+                                    <i class="ri-arrow-left-line" aria-hidden="true"></i>
+                                    <span>All characters</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="fhp-rule fhp-mt-30" />
+                    <span class="fhp-eyebrow">File</span>
+                    <div class="fhp-prose">
+                        <p>@(string.IsNullOrWhiteSpace(ch.Bio) ? "No biography has been written for this character yet." : ch.Bio)</p>
+                    </div>
                 </div>
-                <div class="text-muted mb-3">
-                    🌍 @(ch.Fandom ?? "Unknown fandom") · 📂 @ch.Category.Name
-                </div>
-                <p style="white-space:pre-line;">@(ch.Bio ?? "No biography yet.")</p>
+
+                @if (Model.RelatedContent.Count > 0)
+                {
+                    <div class="fhp-mt-40">
+                        <div class="fhp-section-head">
+                            <div class="fhp-section-head__title">
+                                <h2>On screen in</h2>
+                            </div>
+                            <a class="fhp-more" asp-controller="Explore" asp-action="Index" asp-route-categoryId="@ch.CategoryId">
+                                More from @(ch.Category?.Name ?? "this fandom")
+                            </a>
+                        </div>
+                        <div class="fhp-grid fhp-grid--3">
+                            @foreach (var related in Model.RelatedContent)
+                            {
+                                <partial name="_ContentCard" model="related" />
+                            }
+                        </div>
+                    </div>
+                }
             </div>
+
+            <aside class="fhp-aside" aria-label="Character navigation">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Jump to a fandom</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Characters" asp-action="Index">
+                                Full cast <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="Explore" asp-action="Index">
+                                Browse titles <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="News" asp-action="Index">
+                                Read the news <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h2 class="fhp-side-title fhp-mt-25">Your list</h2>
+                    <p class="fhp-hint">Saved characters show up on your bookmarks page on every device you sign in from.</p>
+                    <a class="fhp-btn fhp-btn--ghost fhp-btn--block" asp-controller="Bookmarks" asp-action="Index">
+                        Open my bookmarks
+                    </a>
+                </div>
+            </aside>
         </div>
     </div>
-</div>
+</section>
 
-@if (Model.RelatedContent.Count > 0)
-{
-    <h2 class="section-title h5 mb-3">Content in @ch.Category.Name</h2>
-    <div class="row g-3">
-        @foreach (var r in Model.RelatedContent)
-        {
-            <div class="col-6 col-md-3">
-                <partial name="_ContentCard" model="r" />
-            </div>
-        }
-    </div>
-}
+<partial name="_JoinNow" />

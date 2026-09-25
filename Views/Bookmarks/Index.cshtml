@@ -1,65 +1,128 @@
 @model MyBookmarksViewModel
 @{
     ViewData["Title"] = "My Bookmarks";
-    var crumbs = new List<BreadcrumbItem> { new("My Bookmarks") };
-}
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("My Bookmarks") };
+    var saved = Model.Groups.Sum(g => g.Items.Count);
 
-<partial name="_Breadcrumbs" model="crumbs" />
-
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="page-title h3 mb-0">♥ My bookmarks</h1>
-    <span class="text-muted small">@Model.Groups.Sum(g => g.Items.Count) saved item(s)</span>
-</div>
-
-@if (Model.Groups.Count == 0)
-{
-    <div class="empty-state">
-        <div style="font-size:3rem;">🔖</div>
-        <p>You have no bookmarks yet. Tap ♡ Bookmark on any content, character, article or merch page.</p>
-        <a asp-controller="Explore" asp-action="Index" class="btn btn-primary">Explore content</a>
-    </div>
-}
-else
-{
-    @foreach (var group in Model.Groups)
+    // One icon per bookmark kind, so each group reads at a glance.
+    Func<BookmarkType, string> glyph = kind => kind switch
     {
-        var icon = group.Type switch
-        {
-            BookmarkType.Content => "🎬",
-            BookmarkType.Article => "📰",
-            BookmarkType.Character => "🎭",
-            BookmarkType.Merchandise => "🛍",
-            BookmarkType.Video => "🎞",
-            _ => "🔖"
-        };
-        <h2 class="section-title h5 mt-4 mb-3">@icon @group.Type</h2>
-        <div class="list-group shadow-sm mb-4">
-            @foreach (var item in group.Items)
-            {
-                <div class="list-group-item py-3">
-                    <div class="d-flex w-100 justify-content-between align-items-start flex-wrap gap-2">
-                        <div>
-                            <a href="@item.LinkUrl" class="fw-semibold text-reset">@item.Title</a>
-                            @if (!string.IsNullOrEmpty(item.Subtitle))
-                            {
-                                <div class="small text-muted">@item.Subtitle</div>
-                            }
-                            @if (!string.IsNullOrEmpty(item.Note))
-                            {
-                                <div class="small fst-italic text-primary">📝 @item.Note</div>
-                            }
-                        </div>
-                        <div class="text-end">
-                            <div class="small text-muted mb-1">saved @item.CreatedAt.ToString("MMM d, yyyy")</div>
-                            <form asp-action="Remove" asp-route-id="@item.BookmarkId" method="post"
-                                  onsubmit="return confirm('Remove this bookmark?');">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
+        BookmarkType.Content => "ri-film-line",
+        BookmarkType.Article => "ri-newspaper-line",
+        BookmarkType.Character => "ri-user-3-line",
+        BookmarkType.Merchandise => "ri-shopping-bag-3-line",
+        BookmarkType.Video => "ri-video-line",
+        _ => "ri-bookmark-line",
+    };
+    Func<BookmarkType, string> plural = kind => kind switch
+    {
+        BookmarkType.Content => "Titles",
+        BookmarkType.Article => "Stories",
+        BookmarkType.Character => "Characters",
+        BookmarkType.Merchandise => "Collectibles",
+        BookmarkType.Video => "Videos",
+        _ => "Saved items",
+    };
 }
+
+<partial name="_PageBanner" model="trail" />
+
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
+
+            <div>
+                <div class="fhp-panel fhp-panel--flush">
+                    <div class="fhp-section-head">
+                        <div class="fhp-section-head__title">
+                            <h2>Your library</h2>
+                        </div>
+                        <span class="fhp-hint">@saved item(s) saved</span>
+                    </div>
+
+                    @if (saved == 0)
+                    {
+                        <div class="fhp-empty">
+                            <h2 class="fhp-empty__title">Nothing saved yet</h2>
+                            <p>Tap the heart on any title, story, character or collectible and it will wait for you here.</p>
+                            <a class="fhp-btn fhp-btn--primary" asp-controller="Explore" asp-action="Index">Explore the library</a>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var group in Model.Groups)
+                        {
+                            <section class="fhp-mt-40">
+                                <h3 class="fhp-saved__head">
+                                    <i class="@glyph(group.Type)" aria-hidden="true"></i>
+                                    @plural(group.Type)
+                                    <span>@group.Items.Count</span>
+                                </h3>
+                                @foreach (var item in group.Items)
+                                {
+                                    <div class="fhp-saved__row">
+                                        <div>
+                                            <h4 class="fhp-saved__title">
+                                                <a href="@item.LinkUrl">@item.Title</a>
+                                            </h4>
+                                            @if (!string.IsNullOrWhiteSpace(item.Subtitle))
+                                            {
+                                                <p class="fhp-saved__sub">@item.Subtitle</p>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(item.Note))
+                                            {
+                                                <p class="fhp-saved__note">
+                                                    <i class="ri-sticky-note-line" aria-hidden="true"></i> @item.Note
+                                                </p>
+                                            }
+                                        </div>
+                                        <div class="fhp-saved__drop">
+                                            <span class="fhp-hint">@item.CreatedAt.ToString("dd MMM yyyy")</span>
+                                            <form asp-action="Remove" asp-route-id="@item.BookmarkId" method="post"
+                                                  onsubmit="return confirm('Remove this bookmark?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="fhp-btn fhp-btn--ghost fhp-btn--sm">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </section>
+                        }
+                    }
+                </div>
+            </div>
+
+            <aside class="fhp-aside" aria-label="Bookmark help">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Keep browsing</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Explore" asp-action="Index">Titles <i class="ri-arrow-right-line" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a asp-controller="News" asp-action="Index">News &amp; timeline <i class="ri-arrow-right-line" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a asp-controller="Characters" asp-action="Index">Characters <i class="ri-arrow-right-line" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a asp-controller="Merch" asp-action="Index">Merchandise <i class="ri-arrow-right-line" aria-hidden="true"></i></a>
+                        </li>
+                        <li>
+                            <a asp-controller="Events" asp-action="Index">Events <i class="ri-arrow-right-line" aria-hidden="true"></i></a>
+                        </li>
+                    </ul>
+
+                    <h2 class="fhp-side-title fhp-mt-25">How it works</h2>
+                    <p class="fhp-hint">
+                        Bookmarks are tied to your account, so the list follows you between devices.
+                        Ratings work the same way &mdash; one tap, and FanHubPlus remembers your score.
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<partial name="_JoinNow" />

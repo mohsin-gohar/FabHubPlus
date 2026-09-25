@@ -1,10 +1,21 @@
 @{
     ViewData["Title"] = "Access denied";
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Access denied") };
 }
 
-<div class="text-center py-5">
-    <div style="font-size:4rem;">🔒</div>
-    <h1 class="page-title">Access denied</h1>
-    <p class="text-muted">You need administrator rights to open this page.</p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to home</a>
-</div>
+<partial name="_PageBanner" model="trail" />
+
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-empty">
+            <p class="fhp-code">403</p>
+            <h1 class="fhp-empty__title">That corner is staff only</h1>
+            <p>You need administrator rights to open this page. If you believe you should have access, ask an admin to grant it.</p>
+            <div class="fhp-action-bar fhp-center fhp-mt-25">
+                <a asp-controller="Home" asp-action="Index" class="fhp-btn fhp-btn--primary">Back to home</a>
+                <a asp-controller="Support" asp-action="Index" class="fhp-btn fhp-btn--ghost">Contact support</a>
+            </div>
+        </div>
+    </div>
+</section>

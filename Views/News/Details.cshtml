@@ -21,7 +21,7 @@
                 <div class="fhp-panel fhp-panel--flush">
                     <div class="fhp-detail-head">
                         <div class="fhp-chips fhp-mb-15">
-                            <span class="fhp-chip fhp-chip--accent">@(a.IsTimeline ? "Timeline Story" : "News Bulletin")</span>
+                            <span class="fhp-chip fhp-chip--yellow">@(a.IsTimeline ? "Timeline Story" : "News Bulletin")</span>
                             @if (a.Category is not null)
                             {
                                 <a class="fhp-chip" asp-controller="News" asp-action="Index" asp-route-categoryId="@a.CategoryId">
@@ -52,7 +52,7 @@
 
                         <div class="fhp-action-bar fhp-mt-20">
                             <button type="button"
-                                    class="fhp-btn fhp-btn--ghost bookmark-btn @(Model.IsBookmarked ? "is-active" : "")"
+                                    class="fhp-btn fhp-btn--ghost bookmark-btn @(Model.IsBookmarked ? "is-saved" : "")"
                                     data-type="@((int)BookmarkType.Article)"
                                     data-id="@a.ArticleId"
                                     aria-label="Bookmark this article">
@@ -60,9 +60,9 @@
                                 <span>@(Model.IsBookmarked ? "Saved" : "Save story")</span>
                             </button>
                             <button type="button"
-                                    class="fhp-btn fhp-btn--ghost share-btn"
-                                    data-title="@a.Title"
-                                    data-text="@a.Title"
+                                    class="fhp-btn fhp-btn--ghost fhp-share"
+                                    data-share-title="@a.Title"
+                                    data-share-url="@Url.Action("Details", "News", new { id = a.ArticleId })"
                                     aria-label="Share this story">
                                 <i class="ri-share-forward-line" aria-hidden="true"></i>
                                 <span>Share</span>
@@ -82,9 +82,11 @@
                 @if (Model.Related.Count > 0)
                 {
                     <div class="fhp-mt-40">
-                        <div class="fhp-sec-head">
-                            <span class="fhp-sub">Keep reading</span>
-                            <h2 class="fhp-sec-head__title">Related stories</h2>
+                        <div class="fhp-section-head">
+                            <div class="fhp-section-head__title fhp-section-head__title--stack">
+                                <span class="fhp-eyebrow">Keep reading</span>
+                                <h2>Related stories</h2>
+                            </div>
                         </div>
                         <div class="fhp-grid fhp-grid--2 fhp-mt-20">
                             @foreach (var related in Model.Related)

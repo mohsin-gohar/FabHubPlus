@@ -2,25 +2,35 @@
 @{
     ViewData["Title"] = "Error";
     var code = ViewBag.StatusCode as int?;
+    var heading = code switch
+    {
+        404 => "This page slipped out of the timeline",
+        403 => "That corner is staff only",
+        500 => "Something broke on our side",
+        null => "Something went sideways",
+        _ => $"Error {code}",
+    };
+    var copy = code == 404
+        ? "The address you followed does not lead anywhere. It may have been renamed, or the link may be from an older season."
+        : "We could not finish that request. Try again in a moment, or head back to a page that works.";
 }
 
-<div class="text-center py-5">
-    <div style="font-size:4.5rem;">@(code == 404 ? "🧭" : "💥")</div>
-    <h1 class="page-title mt-2">
-        @(code switch { 404 => "Page not found", 403 => "Access denied", 500 => "Something broke", null => "Oops!", _ => $"Error {code}" })
-    </h1>
-    <p class="text-muted">
-        @(code == 404
-            ? "The page you are looking for does not exist or has been moved."
-            : "An error occurred while processing your request. Please try again.")
-    </p>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-empty">
+            <p class="fhp-code">@(code?.ToString() ?? "!!")</p>
+            <h1 class="fhp-empty__title">@heading</h1>
+            <p>@copy</p>
 
-    @if (Model.ShowRequestId)
-    {
-        <p class="small text-muted"><strong>Request ID:</strong> <code>@Model.RequestId</code></p>
-    }
+            @if (Model.ShowRequestId)
+            {
+                <p class="fhp-hint">Request ID: <code>@Model.RequestId</code></p>
+            }
 
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Back to home</a>
-    <a asp-controller="Explore" asp-action="Index" class="btn btn-outline-secondary mt-2">Explore content</a>
-</div>
-
+            <div class="fhp-action-bar fhp-center fhp-mt-25">
+                <a asp-controller="Home" asp-action="Index" class="fhp-btn fhp-btn--primary">Back to home</a>
+                <a asp-controller="Explore" asp-action="Index" class="fhp-btn fhp-btn--ghost">Explore the library</a>
+            </div>
+        </div>
+    </div>
+</section>

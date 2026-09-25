@@ -4,11 +4,28 @@ using FanHubPlus.Repositories;
 using FanHubPlus.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------- MVC services (controllers + Razor views) ----------
 builder.Services.AddControllersWithViews();
+
+// ---------- Response compression ----------
+// The Misao theme alone ships ~550 KB of CSS + JS. Brotli/GZip takes that
+// down to roughly a fifth on the wire, which is the single biggest
+// load-time win available and costs nothing at runtime.
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json",               // the chatbot + bookmark endpoints
+        "application/wasm",
+        "image/svg+xml",                 // inline icons are text, they compress hard
+    });
+});
 
 // ---------- EF Core + SQL Server (Code-First) ----------
 // The connection string lives in appsettings.json
@@ -80,7 +97,22 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();   // serves wwwroot (css, js, images, uploads)
+app.UseResponseCompression();   // must sit before StaticFiles + the endpoints
+
+// Theme assets are versioned by deployment, app assets (site.css / site.js) by
+// their ?v= hash, and user uploads rarely. A short shared cache keeps repeat
+// visits at zero extra round trips without ever serving a stale upload.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var path = context.Context.Request.Path.Value ?? string.Empty;
+        var isThemeAsset = path.StartsWith("/assets", StringComparison.OrdinalIgnoreCase)
+                        || path.StartsWith("/lib", StringComparison.OrdinalIgnoreCase);
+        context.Context.Response.Headers[HeaderNames.CacheControl] =
+            isThemeAsset ? "public,max-age=604800" : "public,max-age=3600";
+    },
+});
 
 app.UseRouting();
 

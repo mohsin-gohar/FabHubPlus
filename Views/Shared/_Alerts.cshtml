@@ -1,23 +1,24 @@
-@* TempData flash messages (success / error banners) *@
+@* TempData flash messages. One shape for every notice on the site:
+   tinted block, icon, copy, close. Dismissing is handled once in site.js. *@
 @if (TempData["StatusMessage"] is string ok)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        ✅ @ok
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="fhp-alert fhp-alert--success" role="status">
+        <i class="ri-check-line" aria-hidden="true"></i> @ok
+        <button type="button" class="fhp-alert__close" aria-label="Dismiss">&times;</button>
     </div>
 }
 @if (TempData["StatusError"] is string err)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        ⚠️ @err
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="fhp-alert fhp-alert--warning" role="alert">
+        <i class="ri-alert-line" aria-hidden="true"></i> @err
+        <button type="button" class="fhp-alert__close" aria-label="Dismiss">&times;</button>
     </div>
 }
 @if (TempData["PasswordError"] is string perr)
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @perr
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="fhp-alert fhp-alert--warning" role="alert">
+        <i class="ri-lock-line" aria-hidden="true"></i> @perr
+        <button type="button" class="fhp-alert__close" aria-label="Dismiss">&times;</button>
     </div>
 }
 

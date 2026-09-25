@@ -255,4 +255,17 @@
         fhpToastTimer = setTimeout(function () { el.classList.remove('is-visible'); }, 2600);
     }
     window.fhpToast = fhpToast;
+
+    // ---------- Dismissible notices (_Alerts) ----------
+    // One delegated listener so a partial can be dropped anywhere in the tree.
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.fhp-alert__close');
+        if (!btn) return;
+        var box = btn.closest('.fhp-alert');
+        if (!box) return;
+        box.style.transition = 'opacity .25s, transform .25s';
+        box.style.opacity = '0';
+        box.style.transform = 'translateY(-6px)';
+        window.setTimeout(function () { box.remove(); }, 250);
+    });
 })();

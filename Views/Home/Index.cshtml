@@ -17,10 +17,10 @@
             Description = c.Description,
         }).ToList();
     }
-    var movieCover = i => $"/assets/images/movies/movie{(i % 24) + 1}.jpg";
-    var bannerCover = i => $"/assets/images/banners/banner-bg{(i % 6) + 1}.jpg";
-    var categoryCover = i => $"/assets/images/categories/category{(i % 7) + 1}.jpg";
-    var userCover = i => $"/assets/images/users/user{(i % 8) + 1}.jpg";
+    Func<int, string> movieCover = i => $"/assets/images/movies/movie{(i % 24) + 1}.jpg";
+    Func<int, string> bannerCover = i => $"/assets/images/banners/banner-bg{(i % 6) + 1}.jpg";
+    Func<int, string> categoryCover = i => $"/assets/images/categories/category{(i % 7) + 1}.jpg";
+    Func<int, string> userCover = i => $"/assets/images/users/user{(i % 8) + 1}.jpg";
     string Cover(string? url, Func<int, string> fallback, int index) =>
         string.IsNullOrWhiteSpace(url) ? fallback(index) : url;
     var testimonials = new[]

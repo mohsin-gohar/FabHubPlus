@@ -1,67 +1,102 @@
 @model CharactersViewModel
 @{
     ViewData["Title"] = "Characters";
-    var crumbs = new List<BreadcrumbItem> { new("Characters") };
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Characters") };
+    var filtered = !string.IsNullOrWhiteSpace(Model.Search) || Model.CategoryId is > 0;
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="page-title h3 mb-0">🎭 Characters directory</h1>
-    <span class="text-muted small">@Model.Items.Count character(s)</span>
-</div>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-layout">
 
-<form method="get" class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-5">
-                <label class="form-label small">Search by name, fandom or bio</label>
-                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="e.g. Naruto..." />
-            </div>
-            <div class="col-md-4">
-                <label class="form-label small">Fandom category</label>
-                <select name="categoryId" class="form-select">
-                    <option value="">All categories</option>
-                    @foreach (var cat in Model.Categories)
-                    {
-                        <option value="@cat.CategoryId" selected="@(Model.CategoryId == cat.CategoryId ? "selected" : null)">@cat.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3 d-grid">
-                <button class="btn btn-primary" type="submit">Filter</button>
-            </div>
-        </div>
-    </div>
-</form>
+            <div>
+                <div class="fhp-panel fhp-panel--flush">
+                    <h1 class="fhp-panel__title">Meet the cast</h1>
+                    <p class="fhp-hint fhp-mb-25">
+                        Heroes, rivals and everything in between. Search by name, lore, or the fandom they belong to.
+                    </p>
+                    <form method="get" class="fhp-form" role="search">
+                        <div class="fhp-grid fhp-grid--2">
+                            <div class="fhp-field">
+                                <label class="fhp-field__label" for="castSearch">Search</label>
+                                <input id="castSearch" type="search" name="search" value="@Model.Search"
+                                       class="form-control form-input" placeholder="Naruto, Sentinel, …" />
+                            </div>
+                            <div class="fhp-field">
+                                <label class="fhp-field__label" for="castCategory">Fandom</label>
+                                <select id="castCategory" name="categoryId" class="form-select form-input">
+                                    <option value="">All fandoms</option>
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <option value="@category.CategoryId" selected="@(Model.CategoryId == category.CategoryId)">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="fhp-field fhp-field--action">
+                                <button type="submit" class="fhp-btn fhp-btn--primary fhp-btn--block">Find characters</button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="fhp-hint">
+                        @Model.Items.Count character@(Model.Items.Count == 1 ? "" : "s")
+                        @if (filtered)
+                        {
+                            <span>&middot; <a class="fhp-link-strong" asp-controller="Characters" asp-action="Index">Reset</a></span>
+                        }
+                    </p>
+                </div>
 
-<div class="row g-3">
-    @foreach (var ch in Model.Items)
-    {
-        <div class="col-6 col-md-4 col-lg-3">
-            <a asp-action="Details" asp-route-id="@ch.CharacterId"
-               class="card content-card border-0 shadow-sm text-decoration-none h-100">
-                @if (!string.IsNullOrEmpty(ch.ImageUrl))
+                @if (Model.Items.Count == 0)
                 {
-                    <img src="@ch.ImageUrl" class="card-img-top" alt="@ch.Name" />
+                    <div class="fhp-empty">
+                        <h2 class="fhp-empty__title">No one matches that yet</h2>
+                        <p>Try a shorter name, or browse the full cast without filters.</p>
+                        <a class="fhp-btn fhp-btn--primary" asp-controller="Characters" asp-action="Index">Show everyone</a>
+                    </div>
                 }
                 else
                 {
-                    <div class="cover-fallback">🎭 @(ch.Fandom ?? ch.Name)</div>
+                    <div class="fhp-grid fhp-grid--4 fhp-mt-25">
+                        @foreach (var character in Model.Items)
+                        {
+                            <partial name="_CharacterCard" model="character" />
+                        }
+                    </div>
                 }
-                <div class="card-body">
-                    <h2 class="h6 card-title mb-1">@ch.Name</h2>
-                    <div class="small text-muted">@ch.Fandom · @ch.Category.Name</div>
-                </div>
-            </a>
-        </div>
-    }
-</div>
+            </div>
 
-@if (Model.Items.Count == 0)
-{
-    <div class="empty-state">
-        <div style="font-size:3rem;">🕵️</div>
-        <p>No characters match your search.</p>
+            <aside class="fhp-aside" aria-label="Character navigation">
+                <div class="fhp-panel fhp-panel--flush">
+                    <h2 class="fhp-side-title">Fandoms</h2>
+                    <ul class="fhp-list">
+                        <li>
+                            <a asp-controller="Characters" asp-action="Index" class="@(Model.CategoryId is null ? "is-active" : "")">
+                                Every character <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <li>
+                                <a asp-controller="Characters" asp-action="Index" asp-route-categoryId="@category.CategoryId"
+                                   class="@(Model.CategoryId == category.CategoryId ? "is-active" : "")">
+                                    @category.Name <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <h2 class="fhp-side-title fhp-mt-25">Looking for a story?</h2>
+                    <p class="fhp-hint">The library holds every title a character appears in.</p>
+                    <a class="fhp-btn fhp-btn--ghost fhp-btn--block" asp-controller="Explore" asp-action="Index">
+                        Open the library
+                    </a>
+                </div>
+            </aside>
+        </div>
     </div>
-}
+</section>
+
+<partial name="_JoinNow" />

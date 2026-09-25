@@ -1,38 +1,55 @@
 @model SitemapViewModel
 @{
     ViewData["Title"] = "Sitemap";
-    var crumbs = new List<BreadcrumbItem> { new("Sitemap") };
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Sitemap") };
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<h1 class="page-title h3 mb-1">🗺 Sitemap</h1>
-<p class="text-muted small mb-4">
-    Every page of the portal, generated live from the database.
-    Search engines can also consume the machine-readable <a asp-action="Xml">sitemap.xml</a>.
-</p>
-
-<div class="row g-4">
-    @foreach (var section_ in Model.Sections)
-    {
-        <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <h2 class="h6 section-title mb-2">
-                        <a href="@section_.Url">@section_.Title</a>
-                    </h2>
-                    <ul class="list-unstyled small mb-0" style="columns:2;">
-                        @foreach (var link in section_.Children)
-                        {
-                            <li class="mb-1"><a href="@link.Url">@link.Title</a></li>
-                        }
-                        @if (section_.Children.Count == 0)
-                        {
-                            <li class="text-muted">—</li>
-                        }
-                    </ul>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-panel fhp-panel--flush">
+            <div class="fhp-section-head">
+                <div class="fhp-section-head__title">
+                    <h2>Every corner of FanHubPlus</h2>
                 </div>
+                <a class="fhp-more" asp-action="Xml">sitemap.xml</a>
+            </div>
+            <p class="fhp-hint fhp-mb-25">
+                Generated live from the database. Search engines can also read the
+                machine-readable <a class="fhp-link-strong" asp-action="Xml">sitemap.xml</a>.
+            </p>
+
+            <div class="fhp-grid fhp-grid--3">
+                @foreach (var block in Model.Sections)
+                {
+                    <div class="fhp-panel fhp-panel--flush">
+                        <h3 class="fhp-side-title">
+                            <a href="@block.Url">@block.Title</a>
+                        </h3>
+                        @if (block.Children.Count == 0)
+                        {
+                            <p class="fhp-hint">Nothing published here yet.</p>
+                        }
+                        else
+                        {
+                            <ul class="fhp-list">
+                                @foreach (var link in block.Children)
+                                {
+                                    <li>
+                                        <a href="@link.Url">
+                                            @link.Title <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
             </div>
         </div>
-    }
-</div>
+    </div>
+</section>
+
+<partial name="_JoinNow" />

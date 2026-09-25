@@ -1,83 +1,114 @@
 @model EventsViewModel
 @{
     ViewData["Title"] = "Events";
-    var crumbs = new List<BreadcrumbItem> { new("Events") };
+    ViewData["fhpBanner"] = true;
+    var trail = new List<BreadcrumbItem> { new("Events") };
+    var now = DateTime.Now;
 }
 
-<partial name="_Breadcrumbs" model="crumbs" />
+<partial name="_PageBanner" model="trail" />
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <h1 class="page-title h3 mb-0">📅 Fandom events</h1>
-    <span class="text-muted small">@Model.Items.Count event(s)</span>
-</div>
-
-@* ---- Filters ---- *@
-<form method="get" class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label small">City</label>
-                <select name="city" class="form-select">
-                    <option value="">All cities</option>
-                    @foreach (var c in Model.Cities)
-                    {
-                        <option value="@c" selected="@(Model.City == c ? "selected" : null)">@c</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-4">
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" name="past" value="true" id="pastCheck"
-                           checked="@(Model.Past ? "checked" : null)" />
-                    <label class="form-check-label" for="pastCheck">Show past events instead of upcoming</label>
-                </div>
-            </div>
-            <div class="col-md-2 d-grid">
-                <button class="btn btn-primary" type="submit">Apply</button>
-            </div>
-        </div>
-    </div>
-</form>
-
-<div class="row g-4 mb-4">
-    @* ---- Leaflet map (CDN) ---- *@
-    <div class="col-lg-7">
-        <div class="card border-0 shadow-sm overflow-hidden">
-            <div class="card-body p-0">
-                <div id="eventMap" style="height:420px;background:var(--fhp-surface-2);"></div>
-            </div>
-        </div>
-        <div class="form-text">Map pins show upcoming events (source: /Events/Feed JSON).</div>
-    </div>
-
-    @* ---- Event list ---- *@
-    <div class="col-lg-5">
-        <div class="list-group shadow-sm" style="max-height:460px;overflow-y:auto;">
-            @foreach (var e in Model.Items)
-            {
-                <div class="list-group-item py-3">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h2 class="h6 mb-1">@e.Title</h2>
-                        <span class="badge bg-primary rounded-pill">@e.EventDate.ToString("MMM d, yyyy")</span>
+<section class="fhp-section">
+    <div class="container">
+        <div class="fhp-panel fhp-panel--flush">
+            <h1 class="fhp-panel__title">Conventions, meets and fan nights</h1>
+            <form method="get" class="fhp-form" role="search">
+                <div class="fhp-grid fhp-grid--3">
+                    <div class="fhp-field">
+                        <label class="fhp-field__label" for="eventCity">City</label>
+                        <select id="eventCity" name="city" class="form-select form-input">
+                            <option value="">Everywhere</option>
+                            @foreach (var city in Model.Cities)
+                            {
+                                <option value="@city" selected="@(Model.City == city)">@city</option>
+                            }
+                        </select>
                     </div>
-                    <div class="small text-muted mb-1">📍 @e.City @(e.Type is { Length: > 0 } ? "· " + e.Type : "")</div>
-                    @if (!string.IsNullOrEmpty(e.Story))
-                    {
-                        <p class="small mb-1">@e.Story</p>
-                    }
-                    @if (!string.IsNullOrEmpty(e.TicketUrl))
-                    {
-                        <a href="@e.TicketUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Tickets ↗</a>
-                    }
+                    <div class="fhp-field">
+                        <span class="fhp-field__label">Timeline</span>
+                        <label class="fhp-switch">
+                            <input type="checkbox" name="past" value="true" checked="@Model.Past" />
+                            <span>Show past events</span>
+                        </label>
+                    </div>
+                    <div class="fhp-field fhp-field--action">
+                        <button type="submit" class="fhp-btn fhp-btn--primary fhp-btn--block">Apply</button>
+                    </div>
                 </div>
-            }
-            @if (Model.Items.Count == 0)
-            {
-                <div class="list-group-item empty-state">No events for this filter.</div>
-            }
+            </form>
+            <p class="fhp-hint">
+                @Model.Items.Count event@(Model.Items.Count == 1 ? "" : "s")
+                @(Model.Past ? "in the archive" : "coming up")
+            </p>
+        </div>
+
+        <div class="fhp-layout fhp-mt-25">
+            <div>
+                <div class="fhp-map">
+                    <div id="eventMap" class="fhp-map__canvas" role="application" aria-label="Map of fandom events"></div>
+                    <div class="fhp-map__bar">
+                        <span><i class="ri-map-pin-line" aria-hidden="true"></i> @Model.Items.Count pinned location(s)</span>
+                        <span>Powered by the <a href="/Events/Feed">events feed</a></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                @if (Model.Items.Count == 0)
+                {
+                    <div class="fhp-empty">
+                        <h2 class="fhp-empty__title">Nothing on the calendar</h2>
+                        <p>No events match this filter. Try another city or switch back to upcoming events.</p>
+                        <a class="fhp-btn fhp-btn--primary" asp-controller="Events" asp-action="Index">Show upcoming</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="fhp-panel fhp-panel--flush">
+                        @foreach (var e in Model.Items)
+                        {
+                            var past = e.EventDate < now;
+                            <article class="fhp-evrow">
+                                <div class="fhp-evrow__date">
+                                    <b>@e.EventDate.ToString("dd")</b>
+                                    <span>@e.EventDate.ToString("MMM")</span>
+                                </div>
+                                <div class="fhp-evrow__main">
+                                    <h3 class="fhp-evrow__name">@e.Title</h3>
+                                    <p class="fhp-evrow__meta">
+                                        <i class="ri-map-pin-line" aria-hidden="true"></i> @e.City
+                                        @if (e.Type is { Length: > 0 })
+                                        {
+                                            <span>&middot; @e.Type</span>
+                                        }
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(e.Story))
+                                    {
+                                        <p class="fhp-evrow__body">@e.Story</p>
+                                    }
+                                </div>
+                                <div class="fhp-evrow__side">
+                                    @if (past)
+                                    {
+                                        <span class="fhp-chip fhp-chip--quiet">Archived</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(e.TicketUrl))
+                                    {
+                                        <a class="fhp-btn fhp-btn--primary fhp-btn--sm" href="@e.TicketUrl" target="_blank" rel="noopener">
+                                            Tickets
+                                        </a>
+                                    }
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     </div>
-</div>
+</section>
+
+<partial name="_JoinNow" />
 
 @section Scripts {
     @* Leaflet from CDN (only used on this page) *@
@@ -85,7 +116,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         (function () {
-            var map = L.map('eventMap').setView([20, 0], 2);
+            var map = L.map('eventMap', { scrollWheelZoom: false }).setView([20, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 18,
                 attribution: '&copy; OpenStreetMap contributors'

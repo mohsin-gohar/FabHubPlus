@@ -1,0 +1,31 @@
+@* Artwork card - the fan gallery tile. Full-bleed art, author pill,
+   short story excerpt. Clicking the image opens the FSLightbox viewer
+   that is already loaded by the layout, so no extra script is needed.
+   Usage: <partial name="_ArtworkCard" model="submission" /> *@
+@model FanHubPlus.Models.Entities.FanSubmission
+@{
+    var art = string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? $"/assets/images/releases/release{(Model.SubmissionId % 6) + 1}.jpg"
+        : Model.ImageUrl;
+    var story = (Model.Body ?? string.Empty).Trim();
+    var excerpt = story.Length > 132 ? story[..132].TrimEnd() + "\u2026" : story;
+    var author = string.IsNullOrWhiteSpace(Model.User?.Name) ? "Former member" : Model.User.Name;
+}
+<article class="fhp-art">
+    <div class="fhp-art__frame">
+        <a href="@art" data-fslightbox="fan-art" tabindex="-1" aria-hidden="true">
+            <img src="@art" class="fhp-art__img" alt="@Model.Title"
+                 loading="lazy" decoding="async" width="640" height="480" />
+        </a>
+        <span class="fhp-art__by">@author</span>
+    </div>
+    <h3 class="fhp-art__title">@Model.Title</h3>
+    <p class="fhp-art__meta">
+        <span><i class="ri-calendar-line" aria-hidden="true"></i> @Model.CreatedAt.ToString("dd MMM yyyy")</span>
+        <span><i class="ri-palette-line" aria-hidden="true"></i> Community gallery</span>
+    </p>
+    @if (!string.IsNullOrEmpty(excerpt))
+    {
+        <p class="fhp-art__text">@excerpt</p>
+    }
+</article>

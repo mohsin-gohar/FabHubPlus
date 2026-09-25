@@ -36,10 +36,10 @@
                         </div>
 
                         <div class="col-md-7">
-                            <div class="fhp-chips fhp-mb-15">
+                            <div class="fhp-chips fhp-mb-20">
                                 @if (item.IsUpcoming)
                                 {
-                                    <span class="fhp-chip fhp-chip--accent">Upcoming Drop</span>
+                                    <span class="fhp-chip fhp-chip--yellow">Upcoming Drop</span>
                                 }
                                 @if (item.Tag != MerchTag.None)
                                 {
@@ -79,7 +79,7 @@
 
                             <div class="fhp-action-bar fhp-mt-25">
                                 <button type="button"
-                                        class="fhp-btn fhp-btn--primary bookmark-btn @(Model.IsBookmarked ? "is-active" : "")"
+                                        class="fhp-btn fhp-btn--primary bookmark-btn @(Model.IsBookmarked ? "is-saved" : "")"
                                         data-type="@((int)BookmarkType.Merchandise)"
                                         data-id="@item.ItemId"
                                         aria-label="Wishlist this merchandise item">
@@ -87,9 +87,9 @@
                                     <span>@(Model.IsBookmarked ? "On Wishlist" : "Add to Wishlist")</span>
                                 </button>
                                 <button type="button"
-                                        class="fhp-btn fhp-btn--ghost share-btn"
-                                        data-title="@item.Name"
-                                        data-text="Check out @item.Name on FanHubPlus"
+                                        class="fhp-btn fhp-btn--ghost fhp-share"
+                                        data-share-title="@item.Name"
+                                        data-share-url="@Url.Action("Details", "Merch", new { id = item.ItemId })"
                                         aria-label="Share this merchandise">
                                     <i class="ri-share-forward-line" aria-hidden="true"></i>
                                     <span>Share</span>
@@ -113,9 +113,12 @@
                 @if (Model.Related.Count > 0)
                 {
                     <div class="fhp-mt-40">
-                        <div class="fhp-sec-head">
-                            <span class="fhp-sub">Related collectibles</span>
-                            <h2 class="fhp-sec-head__title">More from this fandom</h2>
+                        <div class="fhp-section-head">
+                            <div class="fhp-section-head__title fhp-section-head__title--stack">
+                                <span class="fhp-eyebrow">Related collectibles</span>
+                                <h2>More from this fandom</h2>
+                            </div>
+                            <a class="fhp-more" asp-controller="Merch" asp-action="Index">All merchandise</a>
                         </div>
                         <div class="fhp-grid fhp-grid--2 fhp-mt-20">
                             @foreach (var related in Model.Related)

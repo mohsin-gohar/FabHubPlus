@@ -1,0 +1,32 @@
+@* Character card - a portrait tile that borrows the shop-card geometry so
+   the cast grid and the store grid feel like one family. Fallback art is
+   derived from the id, so a card never renders as a grey hole.
+   Usage: <partial name="_CharacterCard" model="character" /> *@
+@model FanHubPlus.Models.Entities.CharacterProfile
+@{
+    var portrait = string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? $"/assets/images/categories/category{(Model.CharacterId % 7) + 1}.jpg"
+        : Model.ImageUrl;
+    var lore = string.IsNullOrWhiteSpace(Model.Fandom)
+        ? Model.Category?.Name ?? "Fandom"
+        : Model.Fandom;
+}
+<article class="fhp-scard fhp-scard--cast">
+    <div class="fhp-scard__frame">
+        <a asp-controller="Characters" asp-action="Details" asp-route-id="@Model.CharacterId"
+           tabindex="-1" aria-hidden="true">
+            <img src="@portrait" class="fhp-scard__img" alt="@Model.Name"
+                 loading="lazy" decoding="async" width="360" height="450" />
+        </a>
+        <a asp-controller="Characters" asp-action="Details" asp-route-id="@Model.CharacterId"
+           class="fhp-btn fhp-btn--secondary fhp-btn--sm fhp-scard__hover">
+            View profile
+        </a>
+    </div>
+    <div class="fhp-scard__head">
+        <h3 class="fhp-scard__name">
+            <a asp-controller="Characters" asp-action="Details" asp-route-id="@Model.CharacterId">@Model.Name</a>
+        </h3>
+        <span class="fhp-scard__tag">@lore</span>
+    </div>
+</article>

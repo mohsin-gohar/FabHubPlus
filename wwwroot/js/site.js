@@ -28,7 +28,10 @@
     }
 
     function applyPref(pref) {
-        document.documentElement.classList.toggle('dark-mode', pref.dark);
+        // The public site locks the Misao dark theme via data-theme-lock="dark";
+        // only the admin shell can still switch between light and dark.
+        var locked = document.documentElement.getAttribute('data-theme-lock') === 'dark';
+        document.documentElement.classList.toggle('dark-mode', locked || pref.dark);
         document.documentElement.style.fontSize = pref.font + 'px';
     }
 

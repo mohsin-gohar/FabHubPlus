@@ -1,4 +1,4 @@
-@* Reusable content card used by Home + Explorer grids *@
+@* Reusable content card used by Home + Explorer grids (Misao theme style) *@
 @model FanHubPlus.Models.Entities.Content
 @{
     var categoryName = Model.Category?.Name ?? "Uncategorized";
@@ -6,29 +6,29 @@
     var descriptionPreview = description.Length > 90 ? description[..90] + "…" : description;
 }
 
-<div class="card content-card h-100 border-0 shadow-sm">
-    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
-    {
-        <img src="@Model.ThumbnailUrl" class="card-img-top" alt="@Model.Title" />
-    }
-    else
-    {
-        <div class="cover-fallback">@Model.Title</div>
-    }
-    <div class="card-body d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-start mb-1">
-            <span class="badge badge-type rounded-pill">@Model.Type</span>
-            <span class="badge bg-dark rounded-pill view-badge">👁 @Model.ViewCount</span>
-        </div>
-        <h6 class="card-title mt-1 mb-1">
-            <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="text-reset">@Model.Title</a>
-        </h6>
-        <div class="small text-muted mb-2">
+<div class="fhp-card overflow-hidden">
+    <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="fhp-thumb">
+        @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" class="fhp-cover fhp-zoom" alt="@Model.Title" />
+        }
+        else
+        {
+            <div class="fhp-cover-fallback">@Model.Title</div>
+        }
+        <span class="fhp-badge fhp-badge-type">@Model.Type</span>
+        <span class="fhp-badge fhp-badge-views"><i class="ri-eye-line"></i> @Model.ViewCount</span>
+    </a>
+    <div class="p-[20px] text-center">
+        <h3 class="fhp-title text-base leading-none mb-[10px]">
+            <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId">@Model.Title</a>
+        </h3>
+        <p class="text-13 text-body/70 mb-[10px]">
             @categoryName@(Model.Genre is { Length: > 0 } ? " · " + Model.Genre : "")
-        </div>
-        <p class="small text-muted flex-grow-1 mb-2">@descriptionPreview</p>
-        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId"
-           class="btn btn-sm btn-outline-primary mt-auto">Open ▸</a>
+        </p>
+        <p class="text-13 text-body/70 mb-[15px]">@descriptionPreview</p>
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId" class="primary-btn block w-full">
+            <span>Open <i class="ri-arrow-right-line"></i></span>
+        </a>
     </div>
 </div>
-

@@ -1,177 +1,486 @@
 @using System.Text.RegularExpressions
 @{
-    // Preferences cookie written by AccountController / site.js: "0|16" = light, 16px
+    // The public site always runs the Misao (dark) theme; the cookie still
+    // carries the visitor's preferred base font size: "fhp_pref" = "1|16".
     var pref = Context.Request.Cookies["fhp_pref"];
-    var dark = pref != null && pref.StartsWith("1");
     var fontMatch = Regex.Match(pref ?? "", @"\|(\d+)$");
     var fontPx = fontMatch.Success ? fontMatch.Groups[1].Value : "16";
+
     var isAuth = User.Identity?.IsAuthenticated == true;
     var isAdmin = User.IsInRole("Admin");
     var userName = User.Identity?.Name ?? "";
+
+    var controller = (Context.Request.RouteValues["controller"]?.ToString() ?? "Home").ToLowerInvariant();
+
+    // Class strings are copied verbatim from the Misao template so the
+    // compiled Tailwind stylesheet really contains them.
+    string NavLink(string name) =>
+        "nav-link font-bold text-15 relative py-[30px] xl:py-[40px] block text-white transition-all duration-300 ease-in-out hover:text-secondary"
+        + (controller == name ? " active" : "");
+    string DropLink(string name) =>
+        "nav-link font-bold text-15 relative text-white px-[25px] block transition-all duration-300 ease-in-out hover:text-secondary"
+        + (controller == name ? " active" : "");
+    string SideLink(string name) =>
+        "nav-link font-bold text-15 lg:text-base relative block text-white transition-all duration-300 ease-in-out hover:text-secondary"
+        + (controller == name ? " active" : "");
 }
 <!DOCTYPE html>
-<html lang="en" class="@(dark ? "dark-mode" : null)" style="font-size: @(fontPx)px">
+<html lang="en" class="dark-mode" data-theme-lock="dark" style="font-size: @(fontPx)px">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " – " : "")Fan Hub Plus</title>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " | " : "")FanHubPlus</title>
+
+    @* ---------- Misao theme stylesheets ---------- *@
+    <link rel="stylesheet" href="~/assets/css/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="~/assets/css/flaticon_misao.css" />
+    <link rel="stylesheet" href="~/assets/css/scrollCue.css" />
+    <link rel="stylesheet" href="~/assets/css/remixicon.css" />
+    <link rel="stylesheet" href="~/assets/css/style.css" />
+    @* ---------- Bootstrap (grid + widgets used by the inner views) ---------- *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @* ---------- FanHubPlus bridge (Misao palette + overrides) ---------- *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link rel="icon" type="image/png" href="~/assets/images/favicon.ico" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/" />
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montez&amp;family=Montserrat:ital,wght@0,100..900;1,100..900&amp;family=Play:wght@400;700&amp;display=swap" rel="stylesheet" />
+
     <script>
-        // Guests: apply localStorage preference BEFORE first paint (no theme flash)
+        // Apply the stored font-size preference before the first paint.
         (function () {
-            if (!document.cookie.includes('fhp_pref')) {
+            try {
                 var ls = localStorage.getItem('fhp_pref');
                 if (ls) {
                     var p = ls.split('|');
-                    if (p[0] === '1') document.documentElement.classList.add('dark-mode');
                     document.documentElement.style.fontSize = (parseInt(p[1] || '16', 10)) + 'px';
                 }
-            }
+            } catch (e) { /* ignore */ }
         })();
     </script>
 </head>
-<body>
-    <div id="pageLoader" class="page-loader">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
+<body class="min-h-screen flex flex-col">
+    <!-- Preloader -->
+    <div id="preloader" class="fixed top-0 left-0 right-0 bottom-0 z-[999] bg-black flex items-center justify-center">
+        <div class="loader"></div>
     </div>
+    <!-- End Preloader -->
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary sticky-top">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">🎬 Fan Hub <span class="text-primary">Plus</span></a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Explore" asp-action="Index">Explore</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Characters" asp-action="Index">Characters</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="News" asp-action="Index">News &amp; Timeline</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Events" asp-action="Index">Events</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Merch" asp-action="Index">Merch</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="FanArt" asp-action="Index">Fan Art</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Support" asp-action="Index">Support</a></li>
+    <!-- Header -->
+    <header
+        class="py-[15px] lg:!py-0 bg-[#585151]/44 backdrop-blur-[4.5px] mx-[10px] mt-[10px] rounded-t-[10px] fixed top-0 left-0 right-0 z-[4] transition-all duration-300 ease-in-out"
+        id="navbar"
+    >
+        <div class="container 2xl:!px-[30px] lg:!max-w-full xl:!max-w-[1920px]">
+            <div class="relative flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-start">
+                <a asp-controller="Home" asp-action="Index" class="flex-none inline-block">
+                    <span class="font-secondary !font-extrabold uppercase tracking-[0.1em] text-lg md:text-xl text-white leading-none block">
+                        Fan<span class="text-secondary">Hub</span>Plus
+                    </span>
+                </a>
+                <div class="flex-none lg:hidden">
+                    <button
+                        type="button"
+                        id="navbarBurgerToggle"
+                        class="navbar-burger-toggle inline-block leading-none"
+                    >
+                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                    </button>
+                </div>
+                <div class="hidden lg:flex items-center grow basis-full basis-auto">
+                    <ul class="navbar-nav flex items-center flex-row gap-[30px] xl:gap-[40px] 2xl:gap-[50px] mx-auto">
+                        <li class="nav-item relative">
+                            <a asp-controller="Explore" asp-action="Index" class="@NavLink("explore")">Explore</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="Characters" asp-action="Index" class="@NavLink("characters")">Characters</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="News" asp-action="Index" class="@NavLink("news")">News</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="Events" asp-action="Index" class="@NavLink("events")">Events</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="Merch" asp-action="Index" class="@NavLink("merch")">Merch</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="FanArt" asp-action="Index" class="@NavLink("fanart")">Fan Art</a>
+                        </li>
+                        <li class="nav-item relative">
+                            <a asp-controller="Support" asp-action="Index" class="@NavLink("support")">Support</a>
+                        </li>
                     </ul>
+                    <div class="flex items-center gap-[25px] xl:gap-[35px]">
+                        <div class="flex items-center gap-[13px]">
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    id="searchBtn"
+                                    class="text-xl relative inline-block text-white transition-all duration-300 ease-in-out hover:text-secondary"
+                                >
+                                    <i class="ri-search-line"></i>
+                                </button>
+                                <div
+                                    id="searchBox"
+                                    class="absolute mt-[28px] xl:mt-[36px] top-full ltr:right-0 rtl:left-0 w-[380px] xl:w-[420px] bg-black p-[25px] xl:p-[30px] invisible opacity-0 transition-all duration-300 ease-in-out"
+                                >
+                                    <form asp-controller="Explore" asp-action="Index" method="get" class="relative">
+                                        <input type="text" name="search" class="form-input" placeholder="Search for anything" />
+                                        <button
+                                            class="absolute top-1/2 -translate-y-1/2 ltr:right-[20px] rtl:left-[20px] text-xl leading-none transition-all duration-300 ease-in-out hover:text-primary"
+                                            type="submit"
+                                        >
+                                            <i class="ri-search-line"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="w-px bg-white/20 h-[20px]"></div>
 
-                    <form asp-controller="Explore" asp-action="Index" method="get" class="d-flex me-2 my-1">
-                        <input class="form-control form-control-sm me-1" type="search" name="search" placeholder="Search..." aria-label="Search" />
-                        <button class="btn btn-outline-primary btn-sm" type="submit">Search</button>
-                    </form>
-
-                    <div class="d-flex align-items-center gap-1 flex-wrap">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fhpToggleTheme()" title="Toggle dark mode" id="themeToggle">🌙</button>
-                        <div class="btn-group btn-group-sm" role="group" aria-label="Font size">
-                            <button type="button" class="btn btn-outline-secondary" onclick="fhpFontStep(-1)" title="Smaller text">A−</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="fhpFontStep(1)" title="Larger text">A+</button>
+                            @if (isAuth)
+                            {
+                                <ul class="navbar-nav flex items-center flex-row">
+                                    <li class="nav-item relative">
+                                        <a
+                                            href="javascript:void(0);"
+                                            class="nav-link dropdown-toggle font-bold text-15 relative py-[30px] xl:py-[40px] flex items-center gap-[10px] text-white transition-all duration-300 ease-in-out hover:text-secondary"
+                                        >
+                                            <i class="ri-user-3-line text-xl"></i>
+                                            <span class="hidden xl:!inline-block">@(userName.Length > 14 ? userName[..14] + "…" : userName)</span>
+                                        </a>
+                                        <ul class="dropdown-menu absolute min-w-[270px] xl:min-w-[290px] bg-navy-black py-[25px] transition-all duration-300 ease-in-out">
+                                            <li class="nav-item relative mb-[17px] last:mb-0">
+                                                <a asp-controller="Account" asp-action="Profile" class="@DropLink("account")">
+                                                    <i class="ri-user-3-line"></i> Profile &amp; settings
+                                                </a>
+                                            </li>
+                                            <li class="nav-item relative mb-[17px] last:mb-0">
+                                                <a asp-controller="Bookmarks" asp-action="Index" class="@DropLink("bookmarks")">
+                                                    <i class="ri-heart-3-line"></i> My bookmarks
+                                                </a>
+                                            </li>
+                                            <li class="nav-item relative mb-[17px] last:mb-0">
+                                                <a asp-controller="FanArt" asp-action="Index" class="@DropLink("fanart")">
+                                                    <i class="ri-palette-line"></i> My submissions
+                                                </a>
+                                            </li>
+                                            <li class="nav-item relative mb-[17px] last:mb-0">
+                                                <a asp-controller="Chatbot" asp-action="Index" class="@DropLink("chatbot")">
+                                                    <i class="ri-question-answer-line"></i> Chat history
+                                                </a>
+                                            </li>
+                                            @if (isAdmin)
+                                            {
+                                                <li class="nav-item relative mb-[17px] last:mb-0">
+                                                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="@DropLink("dashboard")">
+                                                        <i class="ri-settings-3-line"></i> Admin dashboard
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li class="nav-item relative">
+                                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                                    <button
+                                                        type="submit"
+                                                        class="nav-link font-bold text-15 relative text-white px-[25px] block w-full transition-all duration-300 ease-in-out hover:text-secondary"
+                                                        style="text-align: left;"
+                                                    >
+                                                        <i class="ri-logout-box-r-line"></i> Sign out
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            }
+                            else
+                            {
+                                <a asp-controller="Account" asp-action="Login" class="text-xl relative inline-block text-white transition-all duration-300 ease-in-out hover:text-secondary">
+                                    <i class="ri-user-3-line"></i>
+                                </a>
+                            }
                         </div>
 
                         @if (isAuth)
                         {
-                            <div class="dropdown ms-1">
-                                <a class="btn btn-outline-primary btn-sm dropdown-toggle" href="#" role="button"
-                                   id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                    👤 @(userName.Length > 18 ? userName[..18] + "…" : userName)
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">⚙️ Profile &amp; settings</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Bookmarks" asp-action="Index">♥ My bookmarks</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FanArt" asp-action="Index">🎨 My submissions</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Chatbot" asp-action="Index">🤖 Chat history</a></li>
-                                    @if (isAdmin)
-                                    {
-                                        <li><hr class="dropdown-divider" /></li>
-                                        <li><a class="dropdown-item fw-bold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">🛠 Admin dashboard</a></li>
-                                    }
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                                            <button type="submit" class="dropdown-item">🚪 Sign out</button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
+                            <a asp-controller="Bookmarks" asp-action="Index" class="primary-btn !hidden xl:!inline-block">
+                                <span><i class="ri-heart-3-line"></i> My List</span>
+                            </a>
                         }
                         else
                         {
-                            <a class="btn btn-outline-primary btn-sm ms-1" asp-controller="Account" asp-action="Login">Login</a>
-                            <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Register</a>
+                            <a asp-controller="Account" asp-action="Login" class="primary-btn !hidden xl:!inline-block">
+                                Sign In
+                            </a>
                         }
                     </div>
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
+    <!-- End Header -->
 
-    <main role="main" class="py-3 flex-grow-1">
+    <!-- Sidebar Modal (mobile navigation) -->
+    <div class="sidebar-modal">
+        <div class="p-[20px] md:p-[30px] lg:px-[40px] flex items-center justify-between bg-black border-b border-white/8">
+            <a asp-controller="Home" asp-action="Index" class="flex-none inline-block">
+                <span class="font-secondary !font-extrabold uppercase tracking-[0.1em] text-base text-white leading-none">
+                    Fan<span class="text-secondary">Hub</span>Plus
+                </span>
+            </a>
+            <button
+                type="button"
+                class="inline-block text-xl leading-none text-white transition-all duration-300 ease-in-out hover:text-secondary"
+            >
+                <i class="flaticon-close"></i>
+            </button>
+        </div>
+        <div class="overflow-y-scroll h-screen scrollbar" data-lenis-prevent>
+            <ul class="sidebar-navbar-nav p-[20px] md:p-[30px] lg:px-[40px]">
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Home" asp-action="Index" class="@SideLink("home")">Home</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Explore" asp-action="Index" class="@SideLink("explore")">Explore content</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Characters" asp-action="Index" class="@SideLink("characters")">Characters</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="News" asp-action="Index" class="@SideLink("news")">News &amp; timeline</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Events" asp-action="Index" class="@SideLink("events")">Events</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Merch" asp-action="Index" class="@SideLink("merch")">Merchandise</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="FanArt" asp-action="Index" class="@SideLink("fanart")">Fan art gallery</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Chatbot" asp-action="Index" class="@SideLink("chatbot")">Chatbot</a>
+                </li>
+                <li class="nav-item mb-[20px] last:mb-0">
+                    <a asp-controller="Support" asp-action="Index" class="@SideLink("support")">Support &amp; FAQ</a>
+                </li>
+                <li class="nav-item last:mb-0">
+                    <a asp-controller="Sitemap" asp-action="Index" class="@SideLink("sitemap")">Sitemap</a>
+                </li>
+            </ul>
+
+            <div class="p-[20px] md:p-[30px] lg:px-[40px] fhp-side-foot border-t border-white/8">
+                @if (isAuth)
+                {
+                    <p class="text-13 uppercase font-bold tracking-[0.1em] text-body/70 mb-[15px]">
+                        Signed in as @userName
+                    </p>
+                    <a asp-controller="Bookmarks" asp-action="Index" class="primary-btn block w-full mb-[15px]">
+                        <span><i class="ri-heart-3-line"></i> My bookmarks</span>
+                    </a>
+                    @if (isAdmin)
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="primary-btn with-border block w-full mb-[15px]">
+                            Admin dashboard
+                        </a>
+                    }
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="primary-btn with-border block w-full">Sign out</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="primary-btn block w-full mb-[15px]">
+                        <span>Sign In</span>
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="primary-btn with-border block w-full">
+                        Create account
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="backdrop"></div>
+    <!-- End Sidebar Modal -->
+
+    <!-- Main content -->
+    <main class="flex-1 fhp-main">
         <div class="container">
             <partial name="_Alerts" />
-            @RenderBody()
         </div>
+        @RenderBody()
     </main>
+    <!-- End Main content -->
 
-    <footer class="footer border-top py-4 mt-4">
+    <!-- Footer -->
+    <footer
+        class="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[120px] 2xl:pt-[140px] bg-navy-black bg-cover bg-center bg-no-repeat"
+        style="background-image: url('/assets/images/bg-images/bg-image3.jpg');"
+    >
         <div class="container">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="fw-bold mb-2">🎬 Fan Hub Plus</div>
-                    <p class="small text-muted mb-2">
-                        The universal fandom portal: explore content, follow characters, track events,
-                        share fan art and connect with your community.
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[25px]">
+                <div>
+                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
+                        FanHubPlus
+                    </h3>
+                    <p class="text-body/80 font-bold text-13 md:text-sm lg:text-15 mb-[20px]">
+                        The universal fandom portal: explore content, follow characters,
+                        track events, share fan art and connect with your community.
                     </p>
-                    <div class="small text-muted">🌐 <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> ·
-                        <a href="https://x.com" target="_blank" rel="noopener">X</a> ·
-                        <a href="https://youtube.com" target="_blank" rel="noopener">YouTube</a></div>
-                </div>
-                <div class="col-6 col-md-2">
-                    <div class="fw-semibold mb-2">Explore</div>
-                    <ul class="list-unstyled small footer mb-0">
-                        <li class="mb-1"><a asp-controller="Explore" asp-action="Index">All content</a></li>
-                        <li class="mb-1"><a asp-controller="Characters" asp-action="Index">Characters</a></li>
-                        <li class="mb-1"><a asp-controller="News" asp-action="Index">News</a></li>
-                        <li class="mb-1"><a asp-controller="News" asp-action="Index" asp-route-timeline="true">Timeline</a></li>
-                        <li class="mb-1"><a asp-controller="Events" asp-action="Index">Events map</a></li>
+                    <ul class="flex items-center gap-[10px]">
+                        <li>
+                            <a href="https://facebook.com" target="_blank" rel="noopener"
+                               class="flex items-center justify-center text-white bg-white/30 rounded-full w-[30px] h-[30px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-white">
+                                <i class="ri-facebook-fill"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://youtube.com" target="_blank" rel="noopener"
+                               class="flex items-center justify-center text-white bg-white/30 rounded-full w-[30px] h-[30px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-white">
+                                <i class="ri-youtube-fill"></i>
+                            </a>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="fw-semibold mb-2">Community</div>
-                    <ul class="list-unstyled small footer mb-0">
-                        <li class="mb-1"><a asp-controller="FanArt" asp-action="Index">Fan art gallery</a></li>
-                        <li class="mb-1"><a asp-controller="Merch" asp-action="Index">Merchandise</a></li>
-                        <li class="mb-1"><a asp-controller="Bookmarks" asp-action="Index">My bookmarks</a></li>
-                        <li class="mb-1"><a asp-controller="Support" asp-action="Index">Support &amp; FAQ</a></li>
-                        <li class="mb-1"><a asp-controller="Chatbot" asp-action="Index">Chatbot</a></li>
+                <div>
+                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
+                        Explore
+                    </h3>
+                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Explore" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">All content</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Characters" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Characters</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="News" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">News</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Events" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Events map</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Sitemap" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Sitemap</a>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="fw-semibold mb-2">Account</div>
-                    <ul class="list-unstyled small footer mb-0">
-                        <li class="mb-1"><a asp-controller="Account" asp-action="Login">Login</a></li>
-                        <li class="mb-1"><a asp-controller="Account" asp-action="Register">Register</a></li>
-                        <li class="mb-1"><a asp-controller="Account" asp-action="Profile">Profile</a></li>
-                        <li class="mb-1"><a asp-controller="Sitemap" asp-action="Index">Sitemap</a></li>
-                        <li class="mb-1"><a asp-controller="Sitemap" asp-action="Xml">sitemap.xml</a></li>
+                <div>
+                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
+                        Community
+                    </h3>
+                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="FanArt" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Fan art gallery</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Merch" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Merchandise</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Chatbot" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Chatbot</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Support" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Support &amp; FAQ</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Bookmarks" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Bookmarks</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
+                        Account
+                    </h3>
+                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Account" asp-action="Login" class="transition-all ease-in-out duration-300 hover:text-secondary">Sign in</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Account" asp-action="Register" class="transition-all ease-in-out duration-300 hover:text-secondary">Create account</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Account" asp-action="Profile" class="transition-all ease-in-out duration-300 hover:text-secondary">My profile</a>
+                        </li>
+                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
+                            <a asp-controller="Account" asp-action="ResetPassword" class="transition-all ease-in-out duration-300 hover:text-secondary">Reset password</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
+                        Get In Touch
+                    </h3>
+                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15">
+                        <li class="mb-[15px] md:mb-[17px] last:mb-0">
+                            <p class="mb-[5px]">Our support team is here for you.</p>
+                            <a asp-controller="Support" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
+                                Support centre
+                            </a>
+                        </li>
+                        <li class="mb-[15px] md:mb-[17px] last:mb-0">
+                            <p class="mb-[5px]">Questions about the community?</p>
+                            <a asp-controller="Support" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
+                                support@fanhubplus.com
+                            </a>
+                        </li>
+                        <li class="last:mb-0">
+                            <p class="mb-[5px]">Follow the build log.</p>
+                            <a asp-controller="News" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
+                                Latest updates
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <hr />
-            <div class="small text-muted d-flex justify-content-between flex-wrap gap-2">
-                <span>© 2026 Fan Hub Plus — built for the TechWiz competition.</span>
-                <span><a asp-controller="Sitemap" asp-action="Index">Sitemap</a> · <a asp-controller="Support" asp-action="Index">Contact</a></span>
+            <div class="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[120px] 2xl:pt-[140px]"></div>
+            <div class="md:flex items-center justify-between gap-[25px] text-center ltr:md:text-left rtl:md:text-right">
+                <a asp-controller="Home" asp-action="Index" class="inline-block">
+                    <span class="font-secondary !font-extrabold uppercase tracking-[0.1em] fhp-logo-lg text-white leading-none">
+                        Fan<span class="text-secondary">Hub</span>Plus
+                    </span>
+                </a>
+                <p class="flex-none mt-[15px] md:mt-0">
+                    Copyright <span class="text-secondary font-bold">FanHubPlus</span> © @DateTime.Now.Year — all rights reserved, built for the TechWiz competition on the
+                    <a href="https://envytheme.com/" class="text-secondary font-bold transition-all ease-in-out duration-300 hover:text-primary" target="_blank" rel="noopener">Misao</a> theme.
+                </p>
+                <p class="flex-none mt-[15px] md:mt-0">
+                    <a asp-controller="Sitemap" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Sitemap</a>
+                    ·
+                    <a asp-controller="Support" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Contact</a>
+                </p>
             </div>
+            <div class="pb-[20px] md:pb-[30px] lg:pb-[40px] xl:pb-[50px]"></div>
         </div>
     </footer>
+    <!-- End Footer -->
+
+    <!-- Back To Top -->
+    <button type="button" id="backToTopBtn">
+        <i class="flaticon-up-arrow"></i>
+    </button>
+    <!-- End Back To Top -->
 
     <partial name="_ChatWidget" />
 
+    <!-- Misao theme scripts -->
+    <script src="~/assets/js/scrollCue.min.js"></script>
+    <script src="~/assets/js/gsap.min.js"></script>
+    <script src="~/assets/js/ScrollTrigger.min.js"></script>
+    <script src="~/assets/js/SplitText.min.js"></script>
+    <script src="~/assets/js/ukiyo.min.js"></script>
+    <script src="~/assets/js/lenis.js"></script>
+    <script src="~/assets/js/gsap-custom.js"></script>
+    <script src="~/assets/js/fhp-custom.js"></script>
+
+    <!-- Application scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
 

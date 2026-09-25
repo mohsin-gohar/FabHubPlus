@@ -21,19 +21,32 @@
 /* ---------- DARK MODE (class-based, persisted in cookie fhp_pref) ---------- */
 html.dark-mode {
     color-scheme: dark;
-    --bs-body-bg: #101423;
-    --bs-body-color: #e7ebf5;
-    --bs-tertiary-bg: #1a2032;
-    --bs-secondary-bg: #232b42;
-    --bs-border-color: #2b3450;
-    --bs-link-color: #7aa2ff;
-    --bs-link-hover-color: #9cbaff;
-    --fhp-surface: #171d30;
-    --fhp-surface-2: #121726;
-    --fhp-border: #2b3450;
-    --fhp-text: #e7ebf5;
-    --fhp-text-muted-2: #98a1b8;
-    --fhp-card-shadow: 0 .25rem .75rem rgba(0, 0, 0, .35);
+    /* ---- Misao palette (project name stays FanHubPlus) ------------- */
+    --fhp-primary: #f41b3b;      /* Misao primary  (red)   */
+    --fhp-primary-2: #ff962e;    /* Misao warm accent      */
+    --fhp-accent: #ffea00;       /* Misao secondary (yellow) */
+    --fhp-hero: linear-gradient(135deg, #f41b3b 0%, #ff5c3b 55%, #ffea00 100%);
+    --fhp-surface: #0f0f0f;      /* theme "navy-black"     */
+    --fhp-surface-2: #171717;
+    --fhp-border: rgba(255, 255, 255, .10);
+    --fhp-text: #dddddd;         /* theme body colour      */
+    --fhp-text-muted-2: rgba(221, 221, 221, .65);
+    --fhp-card-shadow: 0 .5rem 1.2rem rgba(0, 0, 0, .55);
+    /* ---- Bootstrap variables -------------------------------------- */
+    --bs-body-bg: #000000;
+    --bs-body-color: #dddddd;
+    --bs-tertiary-bg: #171717;
+    --bs-secondary-bg: #1f1f1f;
+    --bs-border-color: rgba(255, 255, 255, .12);
+    --bs-link-color: #ffea00;
+    --bs-link-hover-color: #f41b3b;
+    --bs-primary: #f41b3b;
+    --bs-primary-rgb: 244, 27, 59;
+    --bs-secondary-rgb: 255, 234, 0;
+    --bs-danger: #f41b3b;
+    /* Bootstrap loads after the theme, so re-assert the Misao typography */
+    --bs-body-font-family: "Play", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bs-body-font-size: .9375rem;
 }
 
 html.dark-mode body { background-color: var(--bs-body-bg); color: var(--bs-body-color); }
@@ -219,3 +232,183 @@ html.dark-mode .star-rating .star { color: #454e6d; }
 .bookmark-btn.active { background: var(--fhp-accent) !important; border-color: var(--fhp-accent) !important; color: #fff !important; }
 .media-embed { position: relative; padding-top: 56.25%; border-radius: .8rem; overflow: hidden; }
 .media-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* =====================================================================
+   MISAO (ENVYTHEME) BRIDGE
+   The public layout is always rendered with html.dark-mode because Misao
+   is a dark-only theme. The rules above therefore already flip the plain
+   Bootstrap widgets (cards, forms, tables, list-groups, pagination,
+   breadcrumbs, modals ...) onto the Misao palette. Everything below only
+   patches the places where Bootstrap and assets/css/style.css collide.
+   ===================================================================== */
+
+/* ---------- Fixed theme header: keep content clear of it ------------ */
+.fhp-main { padding-top: 100px; }
+@media (max-width: 575.98px) { .fhp-main { padding-top: 84px; } }
+
+/* Bootstrap strips .navbar-nav .nav-link horizontal padding and hides every
+   .dropdown-menu with display:none. The Misao header relies on its own
+   visibility/opacity + :hover rules instead, so undo the Bootstrap parts. */
+/* Bootstrap's .navbar-nav column layout, its .navbar-nav .dropdown-menu{position:static}
+   and the heading/list reboot rules would all break the Misao markup - restore it. */
+#navbar .navbar-nav { flex-direction: row; }
+#navbar .navbar-nav > .nav-item > .nav-link { padding-left: 0; padding-right: 0; }
+#navbar .navbar-nav > .nav-item > .nav-link.dropdown-toggle::after { display: none; }
+#navbar .navbar-nav .dropdown-menu {
+    display: block;
+    position: absolute;
+    top: 100%;
+    min-width: 270px;
+    padding: 25px 0;
+    margin: 0;
+    color: #dddddd;
+    background-color: #0f0f0f;
+    border: 0;
+    border-radius: 0;
+}
+#navbar .navbar-nav .nav-item > .dropdown-menu .nav-link { padding-left: 25px; padding-right: 25px; }
+
+/* Bootstrap reboot re-adds list padding + margins that the Misao markup expects to be absent */
+#navbar ul, #navbar ol,
+.sidebar-modal ul, .sidebar-modal ol,
+footer ul, footer ol { padding-left: 0; margin-bottom: 0; list-style: none; }
+.sidebar-modal .nav-link { padding-left: 0; padding-right: 0; }
+
+/* ---------- Bootstrap widgets in the Misao palette ------------------ */
+html.dark-mode .btn-primary,
+html.dark-mode .btn-primary:focus {
+    background-color: var(--fhp-primary);
+    border-color: var(--fhp-primary);
+    color: #fff;
+}
+html.dark-mode .btn-primary:hover { background-color: #d3152f; border-color: #d3152f; }
+html.dark-mode .btn-outline-primary { color: var(--fhp-primary); border-color: var(--fhp-primary); }
+html.dark-mode .btn-outline-primary:hover,
+html.dark-mode .btn-outline-primary:focus {
+    background-color: var(--fhp-primary);
+    border-color: var(--fhp-primary);
+    color: #fff;
+}
+html.dark-mode .btn-outline-secondary { color: var(--fhp-accent); border-color: rgba(255, 255, 255, .28); }
+html.dark-mode .btn-outline-secondary:hover,
+html.dark-mode .btn-outline-secondary:focus {
+    background-color: var(--fhp-accent);
+    border-color: var(--fhp-accent);
+    color: #000;
+}
+html.dark-mode .btn-close { filter: invert(1) grayscale(1) brightness(1.8); }
+html.dark-mode .form-text { color: var(--fhp-text-muted-2); }
+html.dark-mode .badge.bg-secondary { background-color: var(--fhp-accent) !important; color: #000 !important; }
+html.dark-mode .list-group-item-action:hover,
+html.dark-mode .list-group-item-action:focus { background-color: #1d1d1d; color: var(--fhp-text); }
+
+/* ---------- Flash messages (_Alerts partial) ------------------------ */
+html.dark-mode .alert { border-color: rgba(255, 255, 255, .14); }
+html.dark-mode .alert-success { background-color: rgba(255, 234, 0, .10); color: #ffea00; }
+html.dark-mode .alert-danger { background-color: rgba(244, 27, 59, .14); color: #ff90a3; }
+html.dark-mode .alert-info { background-color: rgba(255, 255, 255, .07); color: #cfcfcf; }
+html.dark-mode .alert-warning { background-color: rgba(255, 150, 46, .13); color: #ffc48a; }
+
+/* ---------- Cards used all over the app (_ContentCard etc.) --------- */
+html.dark-mode .content-card {
+    border: 1px solid var(--fhp-border);
+    border-radius: .5rem;
+    overflow: hidden;
+}
+html.dark-mode .content-card:hover {
+    border-color: rgba(244, 27, 59, .55);
+    box-shadow: 0 .9rem 1.8rem rgba(0, 0, 0, .6);
+}
+html.dark-mode .content-card .card-title { color: #fff; }
+html.dark-mode .content-card .card-title a:hover { color: var(--fhp-primary); }
+html.dark-mode .cover-fallback { background: linear-gradient(135deg, #f41b3b, #ff962e); }
+html.dark-mode .section-title,
+html.dark-mode .page-title { color: #fff; }
+html.dark-mode .empty-state { color: rgba(221, 221, 221, .6); }
+html.dark-mode .tag-chip { background: rgba(255, 255, 255, .06); border-color: var(--fhp-border); }
+html.dark-mode .hero { background: var(--fhp-hero); }
+
+/* ---------- Theme helper classes used by the new Home page ---------- */
+.fhp-card {
+    background-color: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-radius: 10px;
+    transition: border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+.fhp-card:hover {
+    border-color: rgba(244, 27, 59, .55);
+    box-shadow: 0 .9rem 1.8rem rgba(0, 0, 0, .6);
+}
+.fhp-cover { height: 260px; object-fit: cover; width: 100%; }
+/* self-contained hover helpers (no dependency on purged Tailwind variants) */
+.fhp-zoom { transition: transform .35s ease; }
+.fhp-card:hover .fhp-zoom { transform: scale(1.08); }
+.fhp-title { transition: color .3s ease; }
+.fhp-card:hover .fhp-title { color: #ffea00; }
+.fhp-card .primary-btn { transition: all .3s ease; }
+
+/* ---------- Card thumb + badges used by _ContentCard --------------- */
+.fhp-thumb { position: relative; display: block; overflow: hidden; }
+.fhp-badge {
+    position: absolute;
+    display: inline-block;
+    border-radius: 5px;
+    background: #000;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+.fhp-badge-type { top: 10px; inset-inline-end: 10px; color: #ffea00; }
+.fhp-badge-views { bottom: 10px; inset-inline-start: 10px; color: #fff; }
+
+/* ---------------------------------------------------------------------
+   Helper classes for the few theme utilities that were not compiled into
+   assets/css/style.css (it is a purged Tailwind build), so they are
+   defined here instead of being invented as Tailwind class names.
+   --------------------------------------------------------------------- */
+.fhp-lede {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+}
+.fhp-stats-row {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+}
+@media (min-width: 48rem) {
+    .fhp-stats-row { margin-top: 60px; }
+}
+.fhp-numbers { font-size: 1.5rem; line-height: 1; }
+@media (min-width: 48rem) {
+    .fhp-numbers { font-size: 2.25rem; }
+}
+.fhp-rating-row { margin-top: 25px; }
+@media (min-width: 48rem) {
+    .fhp-rating-row { margin-top: 45px; }
+}
+.fhp-span-all { grid-column: 1 / -1; }
+.fhp-logo-lg { font-size: 1.25rem; line-height: 1; }
+@media (min-width: 48rem) {
+    .fhp-logo-lg { font-size: 1.5rem; }
+}
+.fhp-side-foot { padding-bottom: 40px; }
+.fhp-side-foot { padding-top: 25px; }
+.fhp-cover-fallback {
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #ffea00;
+    background: linear-gradient(135deg, rgba(244, 27, 59, .35), rgba(15, 15, 15, .9));
+}

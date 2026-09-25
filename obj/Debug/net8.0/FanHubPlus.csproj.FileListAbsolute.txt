@@ -1,3 +1,11 @@
+F:\.net\FanHubPlus\_verify-bin\appsettings.Development.json
+F:\.net\FanHubPlus\_verify-bin\appsettings.json
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.staticwebassets.runtime.json
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.exe
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.deps.json
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.runtimeconfig.json
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.dll
+F:\.net\FanHubPlus\_verify-bin\FanHubPlus.pdb
 F:\.net\FanHubPlus\FanHubPlus\bin\Debug\net8.0\appsettings.Development.json
 F:\.net\FanHubPlus\FanHubPlus\bin\Debug\net8.0\appsettings.json
 F:\.net\FanHubPlus\FanHubPlus\bin\Debug\net8.0\FanHubPlus.staticwebassets.runtime.json

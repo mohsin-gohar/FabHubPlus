@@ -3,155 +3,277 @@
     ViewData["Title"] = "Home";
 }
 
-@* ---------- Hero ---------- *@
-<section class="hero row align-items-center g-4">
-    <div class="col-lg-8">
-        <h1 class="display-5 mb-2">Your universe of fandoms, all in one place.</h1>
-        <p class="lead mb-3">
-            Explore movies, series, games, anime and K-pop. Rate what you love, bookmark your watchlist,
-            follow events on the map and share your fan art with the world.
-        </p>
-        <div class="d-flex flex-wrap gap-2">
-            <a asp-controller="Explore" asp-action="Index" class="btn btn-light btn-lg px-4">🚀 Start exploring</a>
-            <a asp-controller="FanArt" asp-action="Index" class="btn btn-outline-light btn-lg px-4">🎨 Fan art gallery</a>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="row g-2 text-center">
-            <div class="col-4">
-                <div class="stat-card"><div class="stat-value text-primary">@Model.TotalContents</div><div class="stat-label">Titles</div></div>
-            </div>
-            <div class="col-4">
-                <div class="stat-card"><div class="stat-value text-success">@Model.TotalMembers</div><div class="stat-label">Members</div></div>
-            </div>
-            <div class="col-4">
-                <div class="stat-card"><div class="stat-value text-danger">@Model.TotalEvents</div><div class="stat-label">Events</div></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-@* ---------- Fandom categories ---------- *@
-<section class="mb-5">
-    <h2 class="section-title h4 mb-3">Browse by fandom</h2>
-    <div class="row g-3">
-        @foreach (var cat in Model.Categories)
-        {
-            <div class="col-6 col-md-4 col-lg-3">
-                <a asp-controller="Explore" asp-action="Index" asp-route-categoryId="@cat.CategoryId"
-                   class="card content-card border-0 shadow-sm text-decoration-none h-100">
-                    <div class="card-body">
-                        <div class="fw-bold">@cat.Name</div>
-                        <div class="small text-muted">@(cat.Description?.Length > 60 ? cat.Description[..60] + "…" : cat.Description)</div>
+@* ---------- Hero banner (Misao style) ---------- *@
+<div class="px-[10px] pt-[10px] relative">
+    <div
+        class="rounded-[10px] border-[4px] md:border-[6px] border-white/15 bg-cover bg-center bg-no-repeat"
+        style="background-image: url('/assets/images/banners/banner-bg1.jpg');"
+    >
+        <div class="py-[60px] md:py-[80px] lg:py-[100px] relative z-[1]">
+            <div class="container 2xl:!px-[30px] xl:!max-w-[1920px]">
+                <div class="text-center mx-auto">
+                    <span class="inline-block uppercase text-body/80 bg-white/12 rounded-[2px] tracking-[0.15em] backdrop-blur-[3px] py-[3px] px-[10px] text-13 mb-[15px]">
+                        The universal fandom portal
+                    </span>
+                    <h1 class="uppercase font-secondary !font-extrabold text-4xl md:text-6xl lg:text-8xl leading-none lg:-tracking-[0.05em] mb-[15px] text_animation">
+                        Every Fandom, One Home
+                    </h1>
+                    <p class="fhp-lede text-body/80 text-sm md:text-base">
+                        Explore movies, series, games, anime and K-pop. Rate what you love, bookmark your watchlist,
+                        follow events on the map and share your fan art with the world.
+                    </p>
+                    <div class="flex items-center justify-center flex-wrap gap-[15px] md:gap-[20px] mt-[25px] md:mt-[30px]">
+                        <a asp-controller="Explore" asp-action="Index" class="primary-btn">
+                            <span>
+                                <i class="ri-play-fill"></i>
+                                Start Exploring
+                            </span>
+                        </a>
+                        <a asp-controller="FanArt" asp-action="Index" class="primary-btn with-border">
+                            Fan Art Gallery
+                        </a>
                     </div>
-                </a>
-            </div>
-        }
-    </div>
-</section>
-
-@* ---------- Trending ---------- *@
-<section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="section-title h4 mb-0">🔥 Trending now</h2>
-        <a asp-controller="Explore" asp-action="Index" class="btn btn-sm btn-outline-primary">View all</a>
-    </div>
-    <div class="row g-3">
-        @foreach (var item in Model.Trending)
-        {
-            <div class="col-6 col-md-4">
-                <partial name="_ContentCard" model="item" />
-            </div>
-        }
-        @if (Model.Trending.Count == 0)
-        {
-            <div class="col-12"><div class="empty-state">No content yet — check back soon!</div></div>
-        }
-    </div>
-</section>
-
-<div class="row g-4 mb-5">
-    @* ---------- Latest news ---------- *@
-    <div class="col-lg-6">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="section-title h4 mb-0">📰 Latest news</h2>
-            <a asp-controller="News" asp-action="Index" class="btn btn-sm btn-outline-primary">All news</a>
-        </div>
-        <div class="list-group shadow-sm">
-            @foreach (var a in Model.LatestArticles)
-            {
-                <a asp-controller="News" asp-action="Details" asp-route-id="@a.ArticleId"
-                   class="list-group-item list-group-item-action py-3">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">@a.Title</h6>
-                        <small class="text-muted">@a.PublishedAt.ToString("MMM d, yyyy")</small>
-                    </div>
-                    <small class="text-muted">@a.Category.Name @(a.IsTimeline ? "· 🕰 Timeline" : "")</small>
-                </a>
-            }
-            @if (Model.LatestArticles.Count == 0)
-            {
-                <div class="list-group-item empty-state">No articles published yet.</div>
-            }
-        </div>
-    </div>
-
-    @* ---------- Upcoming events ---------- *@
-    <div class="col-lg-6">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="section-title h4 mb-0">📅 Upcoming events</h2>
-            <a asp-controller="Events" asp-action="Index" class="btn btn-sm btn-outline-primary">Map &amp; calendar</a>
-        </div>
-        <div class="list-group shadow-sm">
-            @foreach (var e in Model.UpcomingEvents)
-            {
-                <div class="list-group-item py-3">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">@e.Title</h6>
-                        <span class="badge bg-primary rounded-pill">@e.EventDate.ToString("MMM d")</span>
-                    </div>
-                    <small class="text-muted">📍 @e.City @(e.Type is { Length: > 0 } ? "· " + e.Type : "")</small>
                 </div>
-            }
-            @if (Model.UpcomingEvents.Count == 0)
+
+                @* Hero counters (GSAP counter animation lives in fhp-custom.js) *@
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-[25px] fhp-stats-row">
+                    <div class="bg-white/7 rounded-[10px] py-[20px] px-[15px] text-center">
+                        <div class="text-secondary font-secondary !font-extrabold fhp-numbers">
+                            <span class="counter">@Model.TotalContents</span>
+                        </div>
+                        <span class="block uppercase font-bold text-13 tracking-[0.15em] text-body/70 mt-[5px]">Titles</span>
+                    </div>
+                    <div class="bg-white/7 rounded-[10px] py-[20px] px-[15px] text-center">
+                        <div class="text-secondary font-secondary !font-extrabold fhp-numbers">
+                            <span class="counter">@Model.TotalMembers</span>
+                        </div>
+                        <span class="block uppercase font-bold text-13 tracking-[0.15em] text-body/70 mt-[5px]">Members</span>
+                    </div>
+                    <div class="bg-white/7 rounded-[10px] py-[20px] px-[15px] text-center">
+                        <div class="text-secondary font-secondary !font-extrabold fhp-numbers">
+                            <span class="counter">@Model.TotalEvents</span>
+                        </div>
+                        <span class="block uppercase font-bold text-13 tracking-[0.15em] text-body/70 mt-[5px]">Events</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center text-[#ff962e] text-base md:text-lg gap-[5px] fhp-rating-row">
+                    <i class="ri-star-fill"></i>
+                    <i class="ri-star-fill"></i>
+                    <i class="ri-star-fill"></i>
+                    <i class="ri-star-fill"></i>
+                    <i class="ri-star-fill"></i>
+                    <span class="block uppercase font-bold text-13 md:text-sm tracking-[0.15em] text-body/70 ltr:ml-[5px] rtl:mr-[5px]">
+                        Rated by <span class="text-secondary">@Model.TotalMembers+</span> fans
+@* ---------- Browse by fandom ---------- *@
+<div class="py-[60px] md:py-[80px] lg:py-[100px]">
+    <div class="container">
+        <div class="mb-[25px] md:mb-[35px] lg:mb-[45px] md:flex items-center justify-between gap-[25px]">
+            <div class="flex items-center gap-[13px]">
+                <img src="/assets/images/icons/vector.svg" class="rtl:-scale-x-100" alt="vector" />
+                <h2 class="mb-0 text-[22px] md:text-[26px] lg:text-[32px] leading-none text_animation">
+                    Browse By Fandom
+                </h2>
+            </div>
+            <a
+                asp-controller="Explore"
+                asp-action="Index"
+                class="flex-none mt-[15px] md:mt-0 leading-none inline-block relative font-bold text-secondary transition-all duration-300 ease-in-out hover:text-primary before:absolute before:bottom-0 before:left-0 before:right-0 before:h-px before:bg-secondary before:transition-all before:duration-300 before:ease-in-out hover:before:bg-primary hover:before:scale-x-0"
+            >
+                View All Content
+            </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-[25px]">
+            @foreach (var cat in Model.Categories)
             {
-                <div class="list-group-item empty-state">No upcoming events scheduled.</div>
+                <a
+                    asp-controller="Explore"
+                    asp-action="Index"
+                    asp-route-categoryId="@cat.CategoryId"
+                    class="group fhp-card block p-[25px]"
+                >
+                    <span class="flex items-center justify-center w-[45px] h-[45px] rounded-full bg-primary/12 text-xl text-primary transition-all duration-300 ease-in-out group-hover:bg-primary group-hover:text-white">
+                        <i class="ri-film-line"></i>
+                    </span>
+                    <h3 class="text-base md:text-lg leading-none mt-[15px] mb-[10px]">@cat.Name</h3>
+                    <p class="text-body/70 text-13 md:text-sm">
+                        @(cat.Description is { Length: > 70 } ? cat.Description[..70] + "…" : cat.Description)
+                    </p>
+                </a>
+            }
+            @if (Model.Categories.Count == 0)
+            {
+                <div class="empty-state fhp-span-all">Fandom categories are being prepared.</div>
             }
         </div>
     </div>
 </div>
 
-@* ---------- Featured merch ---------- *@
-<section class="mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="section-title h4 mb-0">🛍 Featured merchandise</h2>
-        <a asp-controller="Merch" asp-action="Index" class="btn btn-sm btn-outline-primary">Browse all</a>
+@* ---------- Trending now ---------- *@
+<div class="py-[60px] md:py-[80px] lg:py-[100px] pt-0">
+    <div class="container">
+        <div class="mb-[25px] md:mb-[35px] lg:mb-[45px] md:flex items-center justify-between gap-[25px]">
+            <div class="flex items-center gap-[13px]">
+                <img src="/assets/images/icons/vector.svg" class="rtl:-scale-x-100" alt="vector" />
+                <h2 class="mb-0 text-[22px] md:text-[26px] lg:text-[32px] leading-none text_animation">
+                    Trending Now
+                </h2>
+            </div>
+            <a
+                asp-controller="Explore"
+                asp-action="Index"
+                asp-route-sort="popular"
+                class="flex-none mt-[15px] md:mt-0 leading-none inline-block relative font-bold text-secondary transition-all duration-300 ease-in-out hover:text-primary before:absolute before:bottom-0 before:left-0 before:right-0 before:h-px before:bg-secondary before:transition-all before:duration-300 before:ease-in-out hover:before:bg-primary hover:before:scale-x-0"
+            >
+                View All Titles
+            </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-[25px]">
+            @foreach (var item in Model.Trending)
+            {
+                <partial name="_ContentCard" model="item" />
+            }
+            @if (Model.Trending.Count == 0)
+            {
+                <div class="empty-state fhp-span-all">No content yet — check back soon!</div>
+            }
+        </div>
     </div>
-    <div class="row g-3">
-        @foreach (var m in Model.FeaturedMerch)
-        {
-            <div class="col-6 col-md-3">
-                <a asp-controller="Merch" asp-action="Details" asp-route-id="@m.ItemId"
-                   class="card content-card border-0 shadow-sm text-decoration-none h-100">
+</div>
+
+@* ---------- Latest news + upcoming events ---------- *@
+<div class="py-[60px] md:py-[80px] lg:py-[100px] pt-0">
+    <div class="container">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-[25px]">
+            @* ---------- News ---------- *@
+            <div>
+                <div class="mb-[25px] md:mb-[35px] md:flex items-center justify-between gap-[25px]">
+                    <div class="flex items-center gap-[13px]">
+                        <img src="/assets/images/icons/vector.svg" class="rtl:-scale-x-100" alt="vector" />
+                        <h2 class="mb-0 text-[22px] md:text-[26px] lg:text-[32px] leading-none">Latest News</h2>
+                    </div>
+                    <a
+                        asp-controller="News"
+                        asp-action="Index"
+                        class="flex-none mt-[15px] md:mt-0 leading-none inline-block relative font-bold text-secondary transition-all duration-300 ease-in-out hover:text-primary before:absolute before:bottom-0 before:left-0 before:right-0 before:h-px before:bg-secondary before:transition-all before:duration-300 before:ease-in-out hover:before:bg-primary hover:before:scale-x-0"
+                    >
+                        All News
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 gap-[20px]">
+                    @foreach (var a in Model.LatestArticles)
+                    {
+                        <a
+                            asp-controller="News"
+                            asp-action="Details"
+                            asp-route-id="@a.ArticleId"
+                            class="fhp-card flex items-center gap-[15px] p-[20px]"
+                        >
+                            <span class="flex-none text-center rounded-[5px] px-[10px] py-[8px] leading-none bg-primary text-white uppercase font-bold text-13">
+                                <span class="block text-base md:text-lg">@a.PublishedAt.ToString("dd")</span>
+                                <span class="block text-13">@a.PublishedAt.ToString("MMM")</span>
+                            </span>
+                            <span class="block">
+                                <span class="fhp-title block text-base md:text-lg leading-none mb-[8px]">@a.Title</span>
+                                <span class="block text-13 md:text-sm text-body/70">
+                                    @a.Category?.Name@(a.IsTimeline ? " · Timeline" : "")
+                                </span>
+                            </span>
+                        </a>
+                    }
+                    @if (Model.LatestArticles.Count == 0)
+                    {
+                        <div class="empty-state">No articles published yet.</div>
+                    }
+                </div>
+            </div>
+
+            @* ---------- Events ---------- *@
+            <div>
+                <div class="mb-[25px] md:mb-[35px] md:flex items-center justify-between gap-[25px]">
+                    <div class="flex items-center gap-[13px]">
+                        <img src="/assets/images/icons/vector.svg" class="rtl:-scale-x-100" alt="vector" />
+                        <h2 class="mb-0 text-[22px] md:text-[26px] lg:text-[32px] leading-none">Upcoming Events</h2>
+                    </div>
+                    <a
+                        asp-controller="Events"
+                        asp-action="Index"
+                        class="flex-none mt-[15px] md:mt-0 leading-none inline-block relative font-bold text-secondary transition-all duration-300 ease-in-out hover:text-primary before:absolute before:bottom-0 before:left-0 before:right-0 before:h-px before:bg-secondary before:transition-all before:duration-300 before:ease-in-out hover:before:bg-primary hover:before:scale-x-0"
+                    >
+                        Map &amp; Calendar
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 gap-[20px]">
+                    @foreach (var e in Model.UpcomingEvents)
+                    {
+                        <div class="fhp-card flex items-center gap-[15px] p-[20px]">
+                            <span class="flex-none text-center rounded-[5px] px-[10px] py-[8px] leading-none bg-secondary text-black uppercase font-bold text-13">
+                                <span class="block text-base md:text-lg">@e.EventDate.ToString("dd")</span>
+                                <span class="block text-13">@e.EventDate.ToString("MMM")</span>
+                            </span>
+                            <span class="block">
+                                <span class="block text-base md:text-lg leading-none mb-[8px]">@e.Title</span>
+                                <span class="block text-13 md:text-sm text-body/70">
+                                    <i class="ri-map-pin-line"></i> @e.City@(e.Type is { Length: > 0 } ? " · " + e.Type : "")
+                                </span>
+                            </span>
+                        </div>
+                    }
+                    @if (Model.UpcomingEvents.Count == 0)
+                    {
+                        <div class="empty-state">No upcoming events scheduled.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ---------- Featured merchandise ---------- *@
+<div class="pb-[60px] md:pb-[80px] lg:pb-[100px]">
+    <div class="container">
+        <div class="mb-[25px] md:mb-[35px] lg:mb-[45px] md:flex items-center justify-between gap-[25px]">
+            <div class="flex items-center gap-[13px]">
+                <img src="/assets/images/icons/vector.svg" class="rtl:-scale-x-100" alt="vector" />
+                <h2 class="mb-0 text-[22px] md:text-[26px] lg:text-[32px] leading-none">Featured Merchandise</h2>
+            </div>
+            <a
+                asp-controller="Merch"
+                asp-action="Index"
+                class="flex-none mt-[15px] md:mt-0 leading-none inline-block relative font-bold text-secondary transition-all duration-300 ease-in-out hover:text-primary before:absolute before:bottom-0 before:left-0 before:right-0 before:h-px before:bg-secondary before:transition-all before:duration-300 before:ease-in-out hover:before:bg-primary hover:before:scale-x-0"
+            >
+                Browse All
+            </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[25px]">
+            @foreach (var m in Model.FeaturedMerch)
+            {
+                <a
+                    asp-controller="Merch"
+                    asp-action="Details"
+                    asp-route-id="@m.ItemId"
+                    class="fhp-card block overflow-hidden"
+                >
                     @if (!string.IsNullOrEmpty(m.ImageUrl))
                     {
-                        <img src="@m.ImageUrl" class="card-img-top" alt="@m.Name" style="height:160px;object-fit:cover;" />
+                        <img src="@m.ImageUrl" class="fhp-cover fhp-zoom" alt="@m.Name" />
                     }
                     else
                     {
-                        <div class="cover-fallback" style="height:160px;">🛍</div>
+                        <div class="fhp-cover-fallback">@m.Name</div>
                     }
-                    <div class="card-body py-2">
-                        <div class="fw-semibold small">@m.Name</div>
-                        <span class="badge bg-secondary rounded-pill">@m.Tag</span>
-                    </div>
+                    <span class="block p-[20px] text-center">
+                        <span class="fhp-title block text-base md:text-lg leading-none mb-[10px]">@m.Name</span>
+                        <span class="inline-block rounded-[5px] px-[15px] py-[4px] bg-secondary text-black text-13 font-bold uppercase tracking-[0.1em]">
+                            @m.Tag
+                        </span>
+                    </span>
                 </a>
-            </div>
-        }
-        @if (Model.FeaturedMerch.Count == 0)
-        {
-            <div class="col-12"><div class="empty-state">Merchandise showcase is being stocked.</div></div>
-        }
+            }
+            @if (Model.FeaturedMerch.Count == 0)
+            {
+                <div class="empty-state">Merchandise showcase is being stocked.</div>
+            }
+        </div>
     </div>
-</section>
-
+</div>

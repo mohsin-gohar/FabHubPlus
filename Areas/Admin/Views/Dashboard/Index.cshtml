@@ -5,7 +5,7 @@
     var maxCat = Math.Max(1, Model.ContentsByCategory.Select(c => c.Count).DefaultIfEmpty(1).Max());
 }
 
-<h1 class="page-title h3 mb-4">📊 Dashboard</h1>
+<h1 class="page-title h3 mb-4">Dashboard</h1>
 
 @* ---------------- KPI cards ---------------- *@
 <div class="row g-3 mb-4">
@@ -88,7 +88,7 @@
     <div class="col-lg-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
-                <h2 class="h6 section-title mb-3">🏆 Top content by views</h2>
+                <h2 class="h6 section-title mb-3">Top content by views</h2>
                 <table class="table table-sm align-middle mb-0">
                     <thead><tr><th>Title</th><th>Category</th><th class="text-end">Views</th></tr></thead>
                     <tbody>
@@ -114,7 +114,7 @@
     <div class="col-lg-6">
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
-                <h2 class="h6 section-title mb-3">💬 Latest feedback</h2>
+                <h2 class="h6 section-title mb-3">Latest feedback</h2>
                 @foreach (var f in Model.RecentFeedback)
                 {
                     <div class="d-flex justify-content-between small mb-2">
@@ -131,7 +131,7 @@
 
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body">
-                <h2 class="h6 section-title mb-3">🖼 Latest fan submissions</h2>
+                <h2 class="h6 section-title mb-3">Latest fan submissions</h2>
                 @foreach (var s in Model.RecentSubmissions)
                 {
                     <div class="d-flex justify-content-between small mb-2">
@@ -148,7 +148,7 @@
 
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <h2 class="h6 section-title mb-3">👥 Newest members</h2>
+                <h2 class="h6 section-title mb-3">Newest members</h2>
                 @foreach (var u in Model.RecentUsers)
                 {
                     <div class="d-flex justify-content-between small mb-2">

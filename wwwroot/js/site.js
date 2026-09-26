@@ -28,8 +28,9 @@
     }
 
     function applyPref(pref) {
-        // The public site locks the Misao dark theme via data-theme-lock="dark";
-        // only the admin shell can still switch between light and dark.
+        // Both shells lock the Misao dark theme via data-theme-lock="dark"
+        // (public site and admin alike), so the stored preference only decides
+        // the font size there; a fresh pref still lights up an unlocked page.
         var locked = document.documentElement.getAttribute('data-theme-lock') === 'dark';
         document.documentElement.classList.toggle('dark-mode', locked || pref.dark);
         document.documentElement.style.fontSize = pref.font + 'px';

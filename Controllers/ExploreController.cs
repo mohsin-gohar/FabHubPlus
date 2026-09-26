@@ -51,7 +51,8 @@ public class ExploreController : Controller
             Categories = await _categories.Query().OrderBy(c => c.Name).ToListAsync()
         };
 
-        var query = _contents.Query().Include(c => c.Category).AsQueryable();
+        // MediaItems come along so a card can offer "play here" instead of a dead link
+        var query = _contents.Query().Include(c => c.Category).Include(c => c.MediaItems).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -112,6 +113,7 @@ public class ExploreController : Controller
             RatingCount = stars.Count,
             Related = await _contents.Query()
                 .Include(c => c.Category)
+                .Include(c => c.MediaItems)
                 .Where(c => c.CategoryId == content.CategoryId && c.ContentId != id)
                 .OrderByDescending(c => c.PopularityScore)
                 .Take(4)

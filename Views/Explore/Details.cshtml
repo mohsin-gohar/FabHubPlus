@@ -7,7 +7,13 @@
     var poster = string.IsNullOrWhiteSpace(item.ThumbnailUrl)
         ? $"/assets/images/videos/video{(item.ContentId % 34) + 1}.jpg"
         : item.ThumbnailUrl;
-    var trailer = Model.Media.FirstOrDefault(m => m.MediaType == MediaType.Video);
+    // Trailer wins over a plain video, and a self-hosted file is played by the
+    // browser while an external link is embedded - either way it plays on-site.
+    var trailer = MediaUrl.Primary(Model.Media);
+    var trailerUrl = trailer is null ? null : MediaUrl.Normalize(trailer.EmbedUrl);
+    var trailerTitle = trailer is null
+        ? item.Title
+        : $"{item.Title} — {trailer.Tag ?? "trailer"}";
     var trail = new List<BreadcrumbItem>
     {
         new("Explore", Url.Action("Index", "Explore")),
@@ -30,9 +36,11 @@
                 <div class="fhp-media">
                     @if (trailer is not null)
                     {
-                        <div class="fhp-media__player">
-                            <iframe src="@trailer.EmbedUrl" title="@(trailer.Tag ?? item.Title)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
+                        <partial name="_MediaPlayer" model="new MediaPlayerViewModel {
+                            Url = trailer.EmbedUrl,
+                            Poster = poster,
+                            Title = trailerTitle
+                        }" />
                     }
                     else
                     {
@@ -50,7 +58,7 @@
                             @if (trailer is not null)
                             {
                                 <span class="fhp-media__sep" aria-hidden="true"></span>
-                                <a href="@trailer.EmbedUrl" target="_blank" rel="noopener" class="fhp-media__play" aria-label="Open the video in a new tab">
+                                <a href="@trailerUrl" target="_blank" rel="noopener" class="fhp-media__play" aria-label="Open the video in a new tab">
                                     <i class="ri-play-fill" aria-hidden="true"></i>
                                 </a>
                             }

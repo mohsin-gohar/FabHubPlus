@@ -43,12 +43,32 @@
 		});
 	}
 
-	// Lenis smooth scroll
-	const lenis = new Lenis({
-		duration: 0.75,
-		smoothWheel: true,
-		smoothTouch: false,
-	});
+	// Lenis smooth scroll - buttery, momentum-based scrolling across the site.
+	// Guarded: if the library is missing or the visitor prefers reduced motion
+	// we simply fall back to the browser's native scrolling (nothing else in
+	// this file depends on `lenis` existing).
+	let lenis = null;
+	const prefersReducedMotion =
+		typeof window.matchMedia === "function" &&
+		window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+	if (typeof Lenis !== "undefined" && !prefersReducedMotion) {
+		lenis = new Lenis({
+			duration: 1.1,
+			easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+			smoothWheel: true,
+			wheelMultiplier: 1,
+			touchMultiplier: 1.6,
+			smoothTouch: false,
+		});
+		// Keep ScrollTrigger's positions in sync with the virtual scroll.
+		if (typeof ScrollTrigger !== "undefined") {
+			lenis.on("scroll", () => ScrollTrigger.update());
+		}
+		// Exposed so other scripts (back-to-top, anchor links) can share the
+		// same easing instead of fighting it with window.scrollTo.
+		window.fhpLenis = lenis;
+	}
 
 	// Master RAF loop
 	function raf(time) {
@@ -56,7 +76,7 @@
 		if (parallax) {
 			parallax.animate();
 		}
-		lenis.raf(time);
+		if (lenis) lenis.raf(time);
 		requestAnimationFrame(raf);
 	}
 	requestAnimationFrame(raf);

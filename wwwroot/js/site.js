@@ -257,6 +257,89 @@
     }
     window.fhpToast = fhpToast;
 
+    // ---------- In-page video player (modal) ----------
+    // Any [data-fhp-video] button (trailer cards, Explorer cards, the showreel)
+    // opens #fhpVideoModal, and the player is built only then: a <video> for a
+    // file this site hosts, an <iframe> for an external embed. Nothing is
+    // requested while the visitor browses, and dropping the node again on close
+    // is what stops the sound.
+    document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('fhpVideoModal');
+        if (!modalEl || typeof bootstrap === 'undefined') return;
+
+        var stage = modalEl.querySelector('.fhp-vmodal__stage');
+        var titleEl = modalEl.querySelector('.fhp-vmodal__title');
+        if (!stage) return;
+
+        function clearPlayer() {
+            var media = stage.querySelector('video');
+            if (media) { try { media.pause(); } catch (e) { /* ignore */ } }
+            stage.innerHTML = '';
+        }
+
+        function buildLocal(src, poster, title) {
+            var video = document.createElement('video');
+            video.className = 'fhp-vmodal__video';
+            video.controls = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.preload = 'metadata';
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+            if (poster) video.poster = poster;
+            video.setAttribute('title', title);
+            video.addEventListener('error', function () {
+                fhpToast('This video could not be loaded. Please try again.');
+            });
+            video.src = src;
+            return video;
+        }
+
+        function buildEmbed(src, title) {
+            var frame = document.createElement('iframe');
+            frame.className = 'fhp-vmodal__frame';
+            frame.src = src + (src.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1&rel=0';
+            frame.title = title;
+            frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+            frame.setAttribute('allowfullscreen', '');
+            return frame;
+        }
+
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-fhp-video]');
+            if (!btn) return;
+
+            var src = btn.getAttribute('data-src');
+            if (!src) return;
+            e.preventDefault();
+
+            var title = btn.getAttribute('data-title') || 'Video';
+            if (titleEl) titleEl.textContent = title;
+
+            clearPlayer();
+            stage.appendChild(btn.getAttribute('data-kind') === 'local'
+                ? buildLocal(src, btn.getAttribute('data-poster'), title)
+                : buildEmbed(src, title));
+
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', clearPlayer);
+    });
+
+    // ---------- Footer "back to top" ----------
+    // Lenis drives the scroll, so prefer its instance and only fall back to
+    // the native API when the script did not boot.
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-fhp-totop]');
+        if (!btn) return;
+        if (window.fhpLenis && typeof window.fhpLenis.scrollTo === 'function') {
+            window.fhpLenis.scrollTo(0, { duration: 1.1 });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
     // ---------- Dismissible notices (_Alerts) ----------
     // One delegated listener so a partial can be dropped anywhere in the tree.
     document.addEventListener('click', function (e) {

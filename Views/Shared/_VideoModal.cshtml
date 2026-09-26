@@ -1,0 +1,20 @@
+@* In-page video modal. Any element carrying [data-fhp-video] opens it;
+   site.js injects a <video> (self-hosted file) or an <iframe> (external
+   embed) only at that moment, so no player is downloaded or requested
+   while the visitor is just browsing. The node is removed again when the
+   modal closes, which is what stops the audio. *@
+<div class="modal fade fhp-vmodal" id="fhpVideoModal" tabindex="-1" aria-hidden="true" aria-labelledby="fhpVideoModalTitle">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="fhp-vmodal__head">
+                <h2 class="fhp-vmodal__title" id="fhpVideoModalTitle">Video</h2>
+                <button type="button" class="fhp-vmodal__close" data-bs-dismiss="modal" aria-label="Close the player">
+                    <i class="ri-close-line" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="fhp-vmodal__body" data-fhp-video-body>
+                <div class="fhp-vmodal__stage"></div>
+            </div>
+        </div>
+    </div>
+</div>

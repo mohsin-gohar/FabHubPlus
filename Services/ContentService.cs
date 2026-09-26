@@ -1,5 +1,6 @@
 using FanHubPlus.Models.Entities;
 using FanHubPlus.Models.Enums;
+using FanHubPlus.Models.ViewModels;
 using FanHubPlus.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,6 +76,7 @@ public class ContentService : IContentService
     public Task<List<Content>> GetTrendingAsync(int count)
         => _contents.Query()
             .Include(c => c.Category)
+            .Include(c => c.MediaItems)   // lets the home cards start the video in place
             .OrderByDescending(c => c.PopularityScore)
             .ThenByDescending(c => c.ViewCount)
             .Take(count)
@@ -100,6 +102,43 @@ public class ContentService : IContentService
             .OrderBy(e => e.EventDate)
             .Take(count)
             .ToListAsync();
+
+    // ---- Trailers for the landing page: only titles that really have a video ----
+    public async Task<List<TrailerViewModel>> GetTrailersAsync(int count)
+    {
+        var rows = await _contents.Query()
+            .Include(c => c.Category)
+            .Include(c => c.MediaItems)
+            .Where(c => c.MediaItems.Any(m => m.MediaType == MediaType.Video || m.MediaType == MediaType.Trailer))
+            .OrderByDescending(c => c.PopularityScore)
+            .ThenByDescending(c => c.ViewCount)
+            .ToListAsync();
+
+        var trailers = new List<TrailerViewModel>();
+        foreach (var content in rows)
+        {
+            // A row with no URL is not playable, so skip it instead of showing a dead card
+            var media = MediaUrl.Primary(content.MediaItems);
+            if (media is null) continue;
+
+            trailers.Add(new TrailerViewModel
+            {
+                Content = content,
+                Media = media,
+                Url = media.EmbedUrl,
+                Kind = MediaUrl.Kind(media.EmbedUrl),
+                // The video poster is a better "trailer still" than the card cover
+                Poster = string.IsNullOrWhiteSpace(content.ThumbnailUrl)
+                    ? $"/assets/images/videos/video{(content.ContentId % 34) + 1}.jpg"
+                    : content.ThumbnailUrl,
+                Label = string.IsNullOrWhiteSpace(media.Tag) ? "Trailer" : media.Tag
+            });
+
+            if (trailers.Count == count) break;
+        }
+
+        return trailers;
+    }
 
     // ---- Rating upsert (unique user+content enforced by DB + service logic) ----
     public async Task<(double avg, int count, int myStars)> RateAsync(string userId, int contentId, int stars)

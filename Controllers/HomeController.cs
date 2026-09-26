@@ -33,6 +33,7 @@ public class HomeController : Controller
             Categories = await _categories.Query()
                 .OrderBy(c => c.Name).ToListAsync(),
             Trending = await _content.GetTrendingAsync(6),
+            Trailers = await _content.GetTrailersAsync(6),
             LatestArticles = await _content.GetLatestArticlesAsync(3),
             UpcomingEvents = await _content.GetUpcomingEventsAsync(3),
             FeaturedMerch = await _content.GetFeaturedMerchAsync(4),

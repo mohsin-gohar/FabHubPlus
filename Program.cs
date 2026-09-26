@@ -99,6 +99,36 @@ else
 app.UseHttpsRedirection();
 app.UseResponseCompression();   // must sit before StaticFiles + the endpoints
 
+// Video files need Range requests: without them a browser either refuses to
+// seek or downloads the whole clip before playing it, and the built-in static
+// file middleware cannot answer them. This handler only touches /assets/videos
+// and delegates the real work to PhysicalFileResult with range processing on.
+app.Use(async (context, next) =>
+{
+    var isRange = context.Request.Headers.TryGetValue("Range", out var range) && range.Count > 0;
+    var isVideo = context.Request.Path.StartsWithSegments("/assets/videos", StringComparison.OrdinalIgnoreCase);
+
+    if (!isRange || !isVideo || !HttpMethods.IsGet(context.Request.Method))
+    {
+        await next();
+        return;
+    }
+
+    var webRoot = builder.Environment.WebRootPath
+                  ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+    var file = Path.GetFullPath(Path.Combine(webRoot,
+        context.Request.Path.Value!.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
+
+    // Never serve anything outside wwwroot, even if the path was crafted
+    if (!file.StartsWith(Path.GetFullPath(webRoot), StringComparison.OrdinalIgnoreCase) || !File.Exists(file))
+    {
+        await next();
+        return;
+    }
+
+    await Results.File(file, "video/mp4", enableRangeProcessing: true).ExecuteAsync(context);
+});
+
 // Theme assets are versioned by deployment, app assets (site.css / site.js) by
 // their ?v= hash, and user uploads rarely. A short shared cache keeps repeat
 // visits at zero extra round trips without ever serving a stale upload.

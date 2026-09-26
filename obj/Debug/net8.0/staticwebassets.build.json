@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "pfT1tpoMcGBfb+UISaZcg87cBtYOJR3lWuJLUAeNybI=",
+  "Hash": "eYEbyR9USE3bd4gllRYAiY63G8BO5tWRqd88IAkMeuo=",
   "Source": "FanHubPlus",
   "BasePath": "_content/FanHubPlus",
   "Mode": "Default",
@@ -2295,25 +2295,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\assets\\images\\monitor.png"
-    },
-    {
-      "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\images\\movie.mp4",
-      "SourceId": "FanHubPlus",
-      "SourceType": "Discovered",
-      "ContentRoot": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\",
-      "BasePath": "_content/FanHubPlus",
-      "RelativePath": "assets/images/movie.mp4",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\assets\\images\\movie.mp4"
     },
     {
       "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\images\\movies\\movie1.jpg",
@@ -4841,6 +4822,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\assets\\js\\ukiyo.min.js"
+    },
+    {
+      "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\videos\\movie.mp4",
+      "SourceId": "FanHubPlus",
+      "SourceType": "Discovered",
+      "ContentRoot": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\",
+      "BasePath": "_content/FanHubPlus",
+      "RelativePath": "assets/videos/movie.mp4",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\assets\\videos\\movie.mp4"
     },
     {
       "Identity": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\css\\site.css",

@@ -1,0 +1,35 @@
+@* Trailer card - "play it right here".
+   The frame reuses the Explorer card styling, only the play button is
+   different: it is a <button> carrying the media data, so site.js can open
+   the in-page modal instead of navigating away. *@
+@model TrailerViewModel
+@{
+    var item = Model.Content;
+    var details = Url.Action("Details", "Explore", new { id = item.ContentId });
+    var playLabel = $"Play the {Model.Label.ToLowerInvariant()} of {item.Title}";
+}
+<article class="fhp-vcard fhp-tcard">
+    <div class="fhp-vcard__frame">
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@item.ContentId" tabindex="-1" aria-hidden="true">
+            <img src="@Model.Poster" class="fhp-vcard__img" alt="@item.Title" loading="lazy" decoding="async" width="480" height="270" />
+        </a>
+
+        <button type="button" class="fhp-vcard__play" data-fhp-video
+                data-kind="@Model.Kind" data-src="@Model.Url" data-poster="@Model.Poster"
+                data-title="@($"{item.Title} — {Model.Label}")"
+                aria-label="@playLabel">
+            <i class="ri-play-fill" aria-hidden="true"></i>
+        </button>
+
+        <span class="fhp-tcard__chip">@Model.Label</span>
+    </div>
+
+    <h3 class="fhp-vcard__title">
+        <a asp-controller="Explore" asp-action="Details" asp-route-id="@item.ContentId">@item.Title</a>
+    </h3>
+    <ul class="fhp-rail">
+        <li>@(item.Category?.Name ?? "Library")</li>
+        <li><span class="fhp-rail__sep" aria-hidden="true"></span></li>
+        <li><a href="@details" class="fhp-tcard__more">Details</a></li>
+    </ul>
+</article>

@@ -9,6 +9,46 @@
 		});
 	}
 
+	// ---------- Premium navbar: scroll-progress hairline + smooth anchors ----------
+	(function navbarExtras() {
+		const bar = document.getElementById("fhpNavProgress");
+		if (bar) {
+			let ticking = false;
+			const update = () => {
+				ticking = false;
+				const doc = document.documentElement;
+				const max = (doc.scrollHeight - window.innerHeight) || 1;
+				const y = window.scrollY || doc.scrollTop || 0;
+				const p = Math.max(0, Math.min(1, y / max));
+				bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+			};
+			window.addEventListener("scroll", () => {
+				if (!ticking) { ticking = true; requestAnimationFrame(update); }
+			}, { passive: true });
+			window.addEventListener("resize", update);
+			update();
+		}
+
+		// Same-page anchors glide through Lenis when it is active, otherwise
+		// fall back to the native smooth behaviour.
+		document.addEventListener("click", (e) => {
+			const a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+			if (!a) return;
+			const hash = a.getAttribute("href");
+			if (!hash || hash === "#") return;
+			let target = null;
+			try { target = document.querySelector(hash); } catch (_) { return; }
+			if (!target) return;
+			e.preventDefault();
+			if (window.fhpLenis) {
+				window.fhpLenis.scrollTo(target, { offset: -110, duration: 1.2 });
+			} else {
+				target.scrollIntoView({ behavior: "smooth", block: "start" });
+			}
+			history.replaceState(null, "", hash);
+		});
+	})();
+
 	// Navbar Sticky (Misao)
 	const navbar = document.getElementById("navbar");
     if (navbar) {
@@ -47,11 +87,21 @@
 			if (!menu || !backdrop) return;
 			menu.classList.add("show");
 			backdrop.classList.add("show");
+			toggles.forEach(b => {
+				if (!b) return;
+				b.classList.add("is-open");
+				b.setAttribute("aria-expanded", "true");
+			});
 		};
 		const closeMenu = () => {
 			if (!menu || !backdrop) return;
 			menu.classList.remove("show");
 			backdrop.classList.remove("show");
+			toggles.forEach(b => {
+				if (!b) return;
+				b.classList.remove("is-open");
+				b.setAttribute("aria-expanded", "false");
+			});
 		};
 		toggles.forEach(btn => {
 			if (!btn) return;
@@ -265,7 +315,11 @@
             }
         });
         backToTopBtn.addEventListener("click", () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (window.fhpLenis) {
+                window.fhpLenis.scrollTo(0, { duration: 1.1 });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         });
     }
     

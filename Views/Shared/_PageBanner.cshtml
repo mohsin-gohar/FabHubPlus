@@ -7,9 +7,38 @@
 @{
     var trail = Model ?? new List<FanHubPlus.Models.ViewModels.BreadcrumbItem>();
     var current = trail.Count > 0 ? trail[^1].Text : string.Empty;
+
+    // Cinematic artwork for the inner-page header. A section that always lives
+    // at the same place gets a fixed picture (so "Characters" always looks like
+    // Characters); detail pages - a different id every time - are hashed from
+    // the route, which still hands each one its own cover.
+    var route = Context.Request.RouteValues;
+    var controller = (route["controller"]?.ToString() ?? "Home").ToLowerInvariant();
+    var id = route["id"]?.ToString() ?? string.Empty;
+
+    var sectionArt = new Dictionary<string, string>
+    {
+        ["explore"]    = "/assets/images/bg-images/bg-image1.jpg",
+        ["characters"] = "/assets/images/bg-images/bg-image2.jpg",
+        ["events"]     = "/assets/images/bg-images/bg-image3.jpg",
+        ["sitemap"]    = "/assets/images/bg-images/bg-image4.jpg",
+        ["news"]       = "/assets/images/bg-images/bg-image5.jpg",
+        ["merch"]      = "/assets/images/bg-images/bg-image6.jpg",
+        ["fanart"]     = "/assets/images/bg-images/bg-image7.jpg",
+        ["support"]    = "/assets/images/bg-images/bg-image8.jpg",
+        ["chatbot"]    = "/assets/images/bg-images/bg-image7.jpg",
+        ["bookmarks"]  = "/assets/images/bg-images/bg-image3.jpg",
+    };
+
+    var seed = 0;
+    foreach (var ch in $"{controller}{id}") seed += ch;
+    var bannerBg = sectionArt.TryGetValue(controller, out var fixedArt)
+        ? fixedArt
+        : $"/assets/images/banners/banner-bg{(seed % 6) + 1}.jpg";
 }
 <section class="fhp-banner">
-    <div class="container">
+    <div class="fhp-banner__bg" style="background-image: url('@bannerBg');" aria-hidden="true"></div>
+    <div class="container fhp-banner__body">
         <h1 class="fhp-banner__title">@current</h1>
         <nav aria-label="Breadcrumb">
             <ol class="fhp-crumbs">

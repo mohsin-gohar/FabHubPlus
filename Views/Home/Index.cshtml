@@ -151,15 +151,41 @@
     </section>
 }
 
+@* ============================ TRAILERS (play inside the site) ============================ *@
+@if (Model.Trailers.Count > 0)
+{
+    <section class="fhp-section--tight">
+        <div class="container">
+            <div class="fhp-section-head">
+                <div class="fhp-section-head__title">
+                    <img src="/assets/images/icons/vector.svg" alt="" aria-hidden="true" />
+                    <h2 class="text_animation">Trailers &amp; videos</h2>
+                </div>
+                <a class="fhp-more" asp-controller="Explore" asp-action="Index">Browse the library</a>
+            </div>
+            <p class="fhp-hint">Press play and the video runs right here &mdash; nothing opens in another site.</p>
+            <div class="fhp-grid fhp-grid--3 fhp-mt-25">
+                @foreach (var trailer in Model.Trailers)
+                {
+                    <partial name="_TrailerCard" model="trailer" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
 @* ============================ VIDEO SHOWCASE ============================ *@
 <section class="fhp-showcase"
          style="background-image: url('/assets/images/bg-images/bg-image1.jpg');"
          data-jarallax='{"speed": 0.3}'>
     <div class="container">
-        <a class="fhp-showcase__play" href="https://www.youtube.com/watch?v=rcCotZMxSXM" data-fslightbox data-cue="slideInDown"
-           aria-label="Play the FanHubPlus showreel">
+        <button type="button" class="fhp-showcase__play" data-fhp-video data-cue="slideInDown"
+                data-kind="local" data-src="/assets/videos/movie.mp4"
+                data-poster="/assets/images/videos/video7.jpg"
+                data-title="FanHubPlus showreel"
+                aria-label="Play the FanHubPlus showreel">
             <i class="ri-play-fill" aria-hidden="true"></i>
-        </a>
+        </button>
         <div class="fhp-grid fhp-grid--3 fhp-mt-45">
             <a class="fhp-showcase__thumb" asp-controller="FanArt" asp-action="Index">
                 <img src="/assets/images/videos/video7.jpg" alt="Fan art gallery" loading="lazy" decoding="async" />

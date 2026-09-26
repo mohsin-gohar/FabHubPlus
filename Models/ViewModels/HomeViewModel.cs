@@ -11,6 +11,9 @@ public class HomeViewModel
     public List<EventItem> UpcomingEvents { get; set; } = new();
     public List<MerchandiseItem> FeaturedMerch { get; set; } = new();
 
+    // Trailers / videos that can be played straight on the landing page
+    public List<TrailerViewModel> Trailers { get; set; } = new();
+
     // Hero counters
     public int TotalContents { get; set; }
     public int TotalMembers { get; set; }

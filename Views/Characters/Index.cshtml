@@ -3,7 +3,7 @@
     ViewData["Title"] = "Characters";
     ViewData["fhpBanner"] = true;
     var trail = new List<BreadcrumbItem> { new("Characters") };
-    var filtered = !string.IsNullOrWhiteSpace(Model.Search) || Model.CategoryId is > 0;
+    var filtered = !string.IsNullOrWhiteSpace(Model.Search) || Model.CategoryId is > 0; 
 }
 
 <partial name="_PageBanner" model="trail" />

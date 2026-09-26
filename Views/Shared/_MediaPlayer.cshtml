@@ -1,0 +1,31 @@
+@* Inline media player used by the detail pages.
+   A self-hosted file (.mp4/.webm...) is played by the browser itself, an
+   external link (YouTube / Vimeo) goes into an iframe - either way the
+   video plays INSIDE the page, the visitor never leaves the site. *@
+@model MediaPlayerViewModel
+@{
+    var raw = (Model.Url ?? string.Empty).Trim();
+    var isLocal = MediaUrl.IsLocalFile(raw);
+    var src = MediaUrl.Normalize(raw);
+    var title = string.IsNullOrWhiteSpace(Model.Title) ? "Video player" : Model.Title;
+}
+@if (!string.IsNullOrWhiteSpace(src))
+{
+    <div class="fhp-media__player @Model.CssClass">
+        @if (isLocal)
+        {
+            <video controls playsinline preload="metadata"
+                   poster="@Model.Poster" title="@title"
+                   @(Model.Loop ? "loop" : "")>
+                <source src="@src" />
+                Your browser cannot play this file &mdash; <a href="@src">open the video</a>.
+            </video>
+        }
+        else
+        {
+            <iframe src="@src" title="@title" loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        }
+    </div>
+}

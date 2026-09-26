@@ -70,12 +70,13 @@
 
     <!-- Header -->
     <header
-        class="py-[15px] lg:!py-0 bg-[#585151]/44 backdrop-blur-[4.5px] mx-[10px] mt-[10px] rounded-t-[10px] fixed top-0 left-0 right-0 z-[4] transition-all duration-300 ease-in-out"
+        class="fhp-nav py-[15px] lg:!py-0 mx-[10px] mt-[10px] rounded-t-[10px] fixed top-0 left-0 right-0 z-[4] transition-all duration-300 ease-in-out"
         id="navbar"
     >
         <div class="container 2xl:!px-[30px] lg:!max-w-full xl:!max-w-[1920px]">
             <div class="relative flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-start">
-                <a asp-controller="Home" asp-action="Index" class="flex-none inline-block">
+                <a asp-controller="Home" asp-action="Index" class="fhp-nav__brand flex-none inline-block">
+                    <span class="fhp-nav__mark" aria-hidden="true">FH</span>
                     <span class="font-secondary !font-extrabold uppercase tracking-[0.1em] text-lg md:text-xl text-white leading-none block">
                         Fan<span class="text-secondary">Hub</span>Plus
                     </span>
@@ -84,11 +85,13 @@
                     <button
                         type="button"
                         id="navbarBurgerToggle"
-                        class="navbar-burger-toggle inline-block leading-none"
+                        class="navbar-burger-toggle fhp-nav__burger inline-block leading-none"
+                        aria-label="Open menu"
+                        aria-expanded="false"
                     >
-                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
-                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
-                        <span class="h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                        <span class="fhp-nav__burger-bar h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                        <span class="fhp-nav__burger-bar h-[3px] w-[30px] my-[5px] block bg-white"></span>
+                        <span class="fhp-nav__burger-bar h-[3px] w-[30px] my-[5px] block bg-white"></span>
                     </button>
                 </div>
                 <div class="hidden lg:flex items-center grow basis-full basis-auto">
@@ -115,19 +118,20 @@
                             <a asp-controller="Support" asp-action="Index" class="@NavLink("support")">Support</a>
                         </li>
                     </ul>
-                    <div class="flex items-center gap-[25px] xl:gap-[35px]">
+                    <div class="fhp-nav__actions flex items-center gap-[25px] xl:gap-[35px]">
                         <div class="flex items-center gap-[13px]">
                             <div class="relative">
                                 <button
                                     type="button"
                                     id="searchBtn"
-                                    class="text-xl relative inline-block text-white transition-all duration-300 ease-in-out hover:text-secondary"
+                                    class="fhp-nav__icon text-xl relative inline-block text-white transition-all duration-300 ease-in-out hover:text-secondary"
+                                    aria-label="Search"
                                 >
                                     <i class="ri-search-line"></i>
                                 </button>
                                 <div
                                     id="searchBox"
-                                    class="absolute mt-[28px] xl:mt-[36px] top-full ltr:right-0 rtl:left-0 w-[380px] xl:w-[420px] bg-black p-[25px] xl:p-[30px] invisible opacity-0 transition-all duration-300 ease-in-out"
+                                    class="fhp-nav__searchbox absolute mt-[28px] xl:mt-[36px] top-full ltr:right-0 rtl:left-0 w-[380px] xl:w-[420px] p-[25px] xl:p-[30px] invisible opacity-0 transition-all duration-300 ease-in-out"
                                 >
                                     <form asp-controller="Explore" asp-action="Index" method="get" class="relative">
                                         <input type="text" name="search" class="form-input" placeholder="Search for anything" />
@@ -140,7 +144,7 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="w-px bg-white/20 h-[20px]"></div>
+                            <div class="fhp-nav__divider w-px bg-white/20 h-[20px]"></div>
 
                             @if (isAuth)
                             {
@@ -148,12 +152,12 @@
                                     <li class="nav-item relative">
                                         <a
                                             href="javascript:void(0);"
-                                            class="nav-link dropdown-toggle font-bold text-15 relative py-[30px] xl:py-[40px] flex items-center gap-[10px] text-white transition-all duration-300 ease-in-out hover:text-secondary"
+                                            class="nav-link dropdown-toggle fhp-nav__user font-bold text-15 relative flex items-center gap-[10px] text-white transition-all duration-300 ease-in-out hover:text-secondary"
                                         >
                                             <i class="ri-user-3-line text-xl"></i>
                                             <span class="hidden xl:!inline-block">@(userName.Length > 14 ? userName[..14] + "…" : userName)</span>
                                         </a>
-                                        <ul class="dropdown-menu absolute min-w-[270px] xl:min-w-[290px] bg-navy-black py-[25px] transition-all duration-300 ease-in-out">
+                                        <ul class="dropdown-menu fhp-nav__dropdown absolute min-w-[270px] xl:min-w-[290px] py-[25px] transition-all duration-300 ease-in-out">
                                             <li class="nav-item relative mb-[17px] last:mb-0">
                                                 <a asp-controller="Account" asp-action="Profile" class="@DropLink("account")">
                                                     <i class="ri-user-3-line"></i> Profile &amp; settings
@@ -205,22 +209,26 @@
                             }
                         </div>
 
+                    <div class="fhp-nav__cta-slot">
                         @if (isAuth)
                         {
-                            <a asp-controller="Bookmarks" asp-action="Index" class="primary-btn !hidden xl:!inline-block">
+                            <a asp-controller="Bookmarks" asp-action="Index" class="primary-btn fhp-nav__cta !hidden xl:!inline-block">
                                 <span><i class="ri-heart-3-line"></i> My List</span>
                             </a>
                         }
                         else
                         {
-                            <a asp-controller="Account" asp-action="Login" class="primary-btn !hidden xl:!inline-block">
-                                Sign In
+                            <a asp-controller="Account" asp-action="Login" class="primary-btn fhp-nav__cta !hidden xl:!inline-block">
+                                <span>Sign In</span>
                             </a>
                         }
+                    </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Scroll progress hairline -->
+        <div class="fhp-nav__progress" aria-hidden="true"><span id="fhpNavProgress"></span></div>
     </header>
     <!-- End Header -->
 
@@ -317,142 +325,130 @@
     <!-- End Main content -->
 
     <!-- Footer -->
-    <footer
-        class="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[120px] 2xl:pt-[140px] bg-navy-black bg-cover bg-center bg-no-repeat"
-        style="background-image: url('/assets/images/bg-images/bg-image3.jpg');"
-    >
-        <div class="container">
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-[25px]">
-                <div>
-                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
-                        FanHubPlus
-                    </h3>
-                    <p class="text-body/80 font-bold text-13 md:text-sm lg:text-15 mb-[20px]">
-                        The universal fandom portal: explore content, follow characters,
-                        track events, share fan art and connect with your community.
+    <footer class="fhp-foot">
+        <div class="fhp-foot__scrim" aria-hidden="true"></div>
+        <div class="fhp-foot__glow" aria-hidden="true"></div>
+        <div class="container fhp-foot__inner">
+            <div class="fhp-foot__layout">
+                <!-- Brand, socials and direct contact -->
+                <div class="fhp-foot__brand">
+                    <a asp-controller="Home" asp-action="Index" class="fhp-foot__logo">
+                        <span class="fhp-foot__mark" aria-hidden="true">FH</span>
+                        <span class="fhp-foot__wordmark">
+                            Fan<span>Hub</span>Plus
+                        </span>
+                    </a>
+                    <p class="fhp-foot__tagline">
+                        The universal fandom portal. Explore content, follow characters,
+                        track events, share fan art and connect with the community.
                     </p>
-                    <ul class="flex items-center gap-[10px]">
+                    <ul class="fhp-foot__social">
                         <li>
-                            <a href="https://facebook.com" target="_blank" rel="noopener"
-                               class="flex items-center justify-center text-white bg-white/30 rounded-full w-[30px] h-[30px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-white">
-                                <i class="ri-facebook-fill"></i>
+                            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="FanHubPlus on Facebook">
+                                <i class="ri-facebook-fill" aria-hidden="true"></i>
                             </a>
                         </li>
                         <li>
-                            <a href="https://youtube.com" target="_blank" rel="noopener"
-                               class="flex items-center justify-center text-white bg-white/30 rounded-full w-[30px] h-[30px] transition-all duration-300 ease-in-out hover:bg-primary hover:text-white">
-                                <i class="ri-youtube-fill"></i>
+                            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="FanHubPlus on Instagram">
+                                <i class="ri-instagram-fill" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="FanHubPlus on X">
+                                <i class="ri-twitter-x-fill" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="FanHubPlus on YouTube">
+                                <i class="ri-youtube-fill" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="FanHubPlus on Discord">
+                                <i class="ri-discord-fill" aria-hidden="true"></i>
                             </a>
                         </li>
                     </ul>
-                </div>
-                <div>
-                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
-                        Explore
-                    </h3>
-                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Explore" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">All content</a>
+                    <ul class="fhp-foot__contact">
+                        <li>
+                            <span class="fhp-foot__contact-ico" aria-hidden="true">
+                                <i class="ri-mail-line"></i>
+                            </span>
+                            <span class="fhp-foot__contact-body">
+                                <span class="fhp-foot__contact-label">Email us</span>
+                                <a href="mailto:support@fanhubplus.com" class="fhp-foot__contact-value">support@fanhubplus.com</a>
+                            </span>
                         </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Characters" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Characters</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="News" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">News</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Events" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Events map</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Sitemap" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Sitemap</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
-                        Community
-                    </h3>
-                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="FanArt" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Fan art gallery</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Merch" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Merchandise</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Chatbot" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Chatbot</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Support" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Support &amp; FAQ</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Bookmarks" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Bookmarks</a>
+                        <li>
+                            <span class="fhp-foot__contact-ico" aria-hidden="true">
+                                <i class="ri-customer-service-line"></i>
+                            </span>
+                            <span class="fhp-foot__contact-body">
+                                <span class="fhp-foot__contact-label">Support centre</span>
+                                <a asp-controller="Support" asp-action="Index" class="fhp-foot__contact-value">Help, FAQ &amp; contact</a>
+                                <span class="fhp-foot__contact-note">Our team usually replies within one business day.</span>
+                            </span>
                         </li>
                     </ul>
                 </div>
-                <div>
-                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
-                        Account
-                    </h3>
-                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15 ltr:md:border-l rtl:md:border-r md:border-white/10 ltr:md:pl-[20px] rtl:md:pr-[20px]">
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Account" asp-action="Login" class="transition-all ease-in-out duration-300 hover:text-secondary">Sign in</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Account" asp-action="Register" class="transition-all ease-in-out duration-300 hover:text-secondary">Create account</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Account" asp-action="Profile" class="transition-all ease-in-out duration-300 hover:text-secondary">My profile</a>
-                        </li>
-                        <li class="mb-[13px] md:mb-[15px] last:mb-0">
-                            <a asp-controller="Account" asp-action="ResetPassword" class="transition-all ease-in-out duration-300 hover:text-secondary">Reset password</a>
-                        </li>
+
+                <!-- Primary navigation groups -->
+                <nav class="fhp-foot__cols" aria-label="Footer">
+                    <div class="fhp-foot__col">
+                        <h3 class="fhp-foot__heading">Explore</h3>
+                        <ul class="fhp-foot__list">
+                            <li><a asp-controller="Explore" asp-action="Index">All content</a></li>
+                            <li><a asp-controller="Characters" asp-action="Index">Characters</a></li>
+                            <li><a asp-controller="News" asp-action="Index">News &amp; timeline</a></li>
+                            <li><a asp-controller="Events" asp-action="Index">Events map</a></li>
+                            <li><a asp-controller="Sitemap" asp-action="Index">Sitemap</a></li>
+                        </ul>
+                    </div>
+                    <div class="fhp-foot__col">
+                        <h3 class="fhp-foot__heading">Community</h3>
+                        <ul class="fhp-foot__list">
+                            <li><a asp-controller="FanArt" asp-action="Index">Fan art gallery</a></li>
+                            <li><a asp-controller="Merch" asp-action="Index">Merchandise</a></li>
+                            <li><a asp-controller="Chatbot" asp-action="Index">Chatbot</a></li>
+                            <li><a asp-controller="Support" asp-action="Index">Support &amp; FAQ</a></li>
+                            <li><a asp-controller="Bookmarks" asp-action="Index">Bookmarks</a></li>
+                        </ul>
+                    </div>
+                    <div class="fhp-foot__col">
+                        <h3 class="fhp-foot__heading">Account</h3>
+                        <ul class="fhp-foot__list">
+                            <li><a asp-controller="Account" asp-action="Login">Sign in</a></li>
+                            <li><a asp-controller="Account" asp-action="Register">Create account</a></li>
+                            <li><a asp-controller="Account" asp-action="Profile">My profile</a></li>
+                            <li><a asp-controller="Account" asp-action="ResetPassword">Reset password</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <!-- Legal bar -->
+            <div class="fhp-foot__bar">
+                <div class="fhp-foot__bar-inner">
+                    <a asp-controller="Home" asp-action="Index" aria-label="FanHubPlus home">
+                        <span class="fhp-foot__wordmark-sm">Fan<span>Hub</span>Plus</span>
+                    </a>
+                    <p class="fhp-foot__copy">
+                        &copy; @DateTime.Now.Year <strong>FanHubPlus</strong>. All rights reserved.
+                        Built for the TechWiz competition on the
+                        <a href="https://envytheme.com/" target="_blank" rel="noopener noreferrer">Misao</a> theme.
+                    </p>
+                    <ul class="fhp-foot__legal">
+                        <li><a asp-controller="Sitemap" asp-action="Index">Sitemap</a></li>
+                        <li aria-hidden="true"><span class="fhp-foot__legal-sep"></span></li>
+                        <li><a asp-controller="Support" asp-action="Index">Contact</a></li>
+                        <li aria-hidden="true"><span class="fhp-foot__legal-sep"></span></li>
+                        <li><a asp-controller="Bookmarks" asp-action="Index">Bookmarks</a></li>
                     </ul>
-                </div>
-                <div>
-                    <h3 class="mb-[20px] md:mb-[25px] lg:mb-[30px] text-base md:text-lg lg:text-xl leading-none">
-                        Get In Touch
-                    </h3>
-                    <ul class="text-body/80 font-bold text-13 md:text-sm lg:text-15">
-                        <li class="mb-[15px] md:mb-[17px] last:mb-0">
-                            <p class="mb-[5px]">Our support team is here for you.</p>
-                            <a asp-controller="Support" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
-                                Support centre
-                            </a>
-                        </li>
-                        <li class="mb-[15px] md:mb-[17px] last:mb-0">
-                            <p class="mb-[5px]">Questions about the community?</p>
-                            <a asp-controller="Support" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
-                                support@fanhubplus.com
-                            </a>
-                        </li>
-                        <li class="last:mb-0">
-                            <p class="mb-[5px]">Follow the build log.</p>
-                            <a asp-controller="News" asp-action="Index" class="text-white text-sm md:text-15 lg:text-base transition-all ease-in-out duration-300 hover:text-secondary">
-                                Latest updates
-                            </a>
-                        </li>
-                    </ul>
+                    <button type="button" class="fhp-foot__totop" data-fhp-totop>
+                        <i class="ri-arrow-up-line" aria-hidden="true"></i>
+                        <span>Top</span>
+                    </button>
                 </div>
             </div>
-            <div class="pt-[60px] md:pt-[80px] lg:pt-[100px] xl:pt-[120px] 2xl:pt-[140px]"></div>
-            <div class="md:flex items-center justify-between gap-[25px] text-center ltr:md:text-left rtl:md:text-right">
-                <a asp-controller="Home" asp-action="Index" class="inline-block">
-                    <span class="font-secondary !font-extrabold uppercase tracking-[0.1em] fhp-logo-lg text-white leading-none">
-                        Fan<span class="text-secondary">Hub</span>Plus
-                    </span>
-                </a>
-                <p class="flex-none mt-[15px] md:mt-0">
-                    Copyright <span class="text-secondary font-bold">FanHubPlus</span> © @DateTime.Now.Year — all rights reserved, built for the TechWiz competition on the
-                    <a href="https://envytheme.com/" class="text-secondary font-bold transition-all ease-in-out duration-300 hover:text-primary" target="_blank" rel="noopener">Misao</a> theme.
-                </p>
-                <p class="flex-none mt-[15px] md:mt-0">
-                    <a asp-controller="Sitemap" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Sitemap</a>
-                    ·
-                    <a asp-controller="Support" asp-action="Index" class="transition-all ease-in-out duration-300 hover:text-secondary">Contact</a>
-                </p>
-            </div>
-            <div class="pb-[20px] md:pb-[30px] lg:pb-[40px] xl:pb-[50px]"></div>
         </div>
     </footer>
     <!-- End Footer -->
@@ -462,6 +458,9 @@
         <i class="flaticon-up-arrow"></i>
     </button>
     <!-- End Back To Top -->
+
+    <!-- In-page video player (opened by any [data-fhp-video] button) -->
+    <partial name="_VideoModal" />
 
     <partial name="_ChatWidget" />
 

@@ -1,167 +1,373 @@
 @model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
+
+    // ---- chart scales -------------------------------------------------
     var maxDay = Math.Max(1, Model.ViewsByDay.Select(d => d.Count).DefaultIfEmpty(1).Max());
     var maxCat = Math.Max(1, Model.ContentsByCategory.Select(c => c.Count).DefaultIfEmpty(1).Max());
+
+    // StatsService always fills exactly 7 days ascending, so the LAST entry is
+    // today and the highest entry is the week's peak.
+    var todayCount = Model.ViewsByDay.LastOrDefault()?.Count ?? 0;
+    var weekTotal = Model.ViewsByDay.Sum(d => d.Count);
+    var peakDay = Model.ViewsByDay.OrderByDescending(d => d.Count).FirstOrDefault();
+    var peakCount = peakDay?.Count ?? 0;
+
+    var userName = User.Identity?.Name ?? "";
+    if (userName.Length == 0) { userName = "Admin"; }
+    var pendingTotal = Model.PendingFeedback + Model.PendingSubmissions;
+
+    // Every KPI meter below is a real ratio, never a decorative width:
+    //   members   -> share of all members who joined this month
+    //   catalogue -> share of the catalogue that is browsable content
+    //   views     -> today measured against the week's busiest day
+    //   queue     -> how much of the review queue is feedback (rest = submissions)
+    var memberShare = (int)Math.Round(100.0 * Model.NewUsersThisMonth / Math.Max(1, Model.TotalUsers));
+    var catalogueShare = (int)Math.Round(100.0 * Model.TotalContents / Math.Max(1, Model.TotalContents + Model.TotalEvents + Model.TotalMerch));
+    var viewShare = (int)Math.Round(100.0 * todayCount / Math.Max(1, peakCount));
+    var queueShare = (int)Math.Round(100.0 * Model.PendingFeedback / Math.Max(1, pendingTotal));
 }
 
-<h1 class="page-title h3 mb-4">Dashboard</h1>
+<div class="fhp-cine">
 
-@* ---------------- KPI cards ---------------- *@
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-label">Members</div>
-            <div class="stat-value text-primary">@Model.TotalUsers</div>
-            <div class="small text-muted">+@Model.NewUsersThisMonth this month</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-label">Contents</div>
-            <div class="stat-value text-success">@Model.TotalContents</div>
-            <div class="small text-muted">@Model.TotalEvents events · @Model.TotalMerch merch</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-label">Total views</div>
-            <div class="stat-value text-danger">@Model.TotalViews</div>
-            <div class="small text-muted">logged in ViewLogs</div>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-label">Pending work</div>
-            <div class="stat-value text-warning">@(Model.PendingFeedback + Model.PendingSubmissions)</div>
-            <div class="small text-muted">@Model.PendingFeedback feedback · @Model.PendingSubmissions submissions</div>
-        </div>
-    </div>
-</div>
+    @* ================= HERO: the title card ================= *@
+    <section class="fhp-cine-hero">
+        <p class="fhp-cine-hero__eyebrow">FanHub Plus · Control Room</p>
+        <h1 class="fhp-cine-hero__title">
+            Welcome back, <span class="fhp-cine-hero__accent">@userName</span>
+        </h1>
+        <p class="fhp-cine-hero__lede">
+            Live numbers straight from the portal — members, catalogue, traffic and
+            everything still sitting in the review queue.
+        </p>
+        <ul class="fhp-cine-hero__meta">
+            <li class="fhp-cine-chip">
+                <i class="ri-eye-line" aria-hidden="true"></i>
+                <span><strong>@weekTotal.ToString("N0")</strong> views this week</span>
+            </li>
+            @if (peakDay is not null && peakCount > 0)
+            {
+                <li class="fhp-cine-chip">
+                    <i class="ri-fire-line" aria-hidden="true"></i>
+                    <span>Peak <strong>@peakCount.ToString("N0")</strong> on @peakDay.Day.ToString("ddd d MMM")</span>
+                </li>
+            }
+            <li class="fhp-cine-chip fhp-cine-chip--live">
+                <i class="ri-pulse-line" aria-hidden="true"></i>
+                <span><strong>@pendingTotal</strong> awaiting review</span>
+            </li>
+        </ul>
+    </section>
 
-<div class="row g-3 mb-4">
-    @* ---------------- Views per day (last 7 days) ---------------- *@
-    <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Views per day (last 7 days)</h2>
-                <div class="linechart">
-                    @foreach (var d in Model.ViewsByDay)
-                    {
-                        var pct = (int)Math.Round(100.0 * d.Count / maxDay);
-                        <div class="col" title="@d.Count views">
-                            <div class="small fw-semibold">@d.Count</div>
-                            <div class="stick" style="height:@pct%;"></div>
-                            <div class="day">@d.Day.ToString("MMM d")</div>
-                        </div>
-                    }
-                </div>
+    @* ================= KPI DECK ================= *@
+    <section class="fhp-kpi-grid" aria-label="Key numbers">
+
+        <article class="fhp-kpi fhp-kpi--red">
+            <div class="fhp-kpi__top">
+                <span class="fhp-kpi__label">Members</span>
+                <span class="fhp-kpi__ico"><i class="ri-group-line" aria-hidden="true"></i></span>
             </div>
-        </div>
-    </div>
+            <p class="fhp-kpi__value">@Model.TotalUsers.ToString("N0")</p>
+            <p class="fhp-kpi__meta"><b>+@Model.NewUsersThisMonth</b> joined this month</p>
+            <div class="fhp-kpi__bar" title="@memberShare% of all members joined this month">
+                <i style="--fhp-kpi-fill:@(memberShare)%"></i>
+            </div>
+        </article>
 
-    @* ---------------- Content per category ---------------- *@
-    <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Content per category</h2>
-                @foreach (var c in Model.ContentsByCategory)
+        <article class="fhp-kpi fhp-kpi--gold">
+            <div class="fhp-kpi__top">
+                <span class="fhp-kpi__label">Catalogue</span>
+                <span class="fhp-kpi__ico"><i class="ri-movie-2-line" aria-hidden="true"></i></span>
+            </div>
+            <p class="fhp-kpi__value">@Model.TotalContents.ToString("N0")</p>
+            <p class="fhp-kpi__meta"><b>@Model.TotalEvents</b> events · <b>@Model.TotalMerch</b> merch items</p>
+            <div class="fhp-kpi__bar" title="@catalogueShare% of everything published is browsable content">
+                <i style="--fhp-kpi-fill:@(catalogueShare)%"></i>
+            </div>
+        </article>
+
+        <article class="fhp-kpi fhp-kpi--amber">
+            <div class="fhp-kpi__top">
+                <span class="fhp-kpi__label">Total views</span>
+                <span class="fhp-kpi__ico"><i class="ri-line-chart-line" aria-hidden="true"></i></span>
+            </div>
+            <p class="fhp-kpi__value">@Model.TotalViews.ToString("N0")</p>
+            <p class="fhp-kpi__meta"><b>@todayCount.ToString("N0")</b> views today · logged in ViewLogs</p>
+            <div class="fhp-kpi__bar" title="Today is at @viewShare% of the week's busiest day">
+                <i style="--fhp-kpi-fill:@(viewShare)%"></i>
+            </div>
+        </article>
+
+        <article class="fhp-kpi fhp-kpi--jade">
+            <div class="fhp-kpi__top">
+                <span class="fhp-kpi__label">Pending work</span>
+                <span class="fhp-kpi__ico"><i class="ri-inbox-archive-line" aria-hidden="true"></i></span>
+            </div>
+            <p class="fhp-kpi__value">@pendingTotal</p>
+            <p class="fhp-kpi__meta"><b>@Model.PendingFeedback</b> feedback · <b>@Model.PendingSubmissions</b> submissions</p>
+            <div class="fhp-kpi__bar" title="@queueShare% of the queue is feedback, the rest is submissions">
+                <i style="--fhp-kpi-fill:@(queueShare)%"></i>
+            </div>
+        </article>
+
+    </section>
+
+    @* ================= CHARTS ================= *@
+    <div class="fhp-panel-grid">
+
+        @* ---- views per day ---- *@
+        <section class="fhp-panel">
+            <header class="fhp-panel__head">
+                <h2 class="fhp-panel__title">
+                    <i class="ri-pulse-line" aria-hidden="true"></i>
+                    Views per day
+                </h2>
+                <span class="fhp-panel__hint">Last 7 days · peak @maxDay.ToString("N0")</span>
+            </header>
+            <div class="fhp-panel__body">
+                @if (Model.ViewsByDay.Count == 0)
                 {
-                    var pct = (int)Math.Round(100.0 * c.Count / maxCat);
-                    <div class="bar-row">
-                        <span>@c.Name</span>
-                        <div class="bar-track"><div class="bar-fill" style="width:@pct%;"></div></div>
-                        <span class="text-end text-muted">@c.Count</span>
+                    <div class="fhp-cine-empty">
+                        <i class="ri-line-chart-line" aria-hidden="true"></i>
+                        <span>No traffic recorded yet.</span>
                     </div>
                 }
+                else
+                {
+                    <div class="fhp-plot" role="img"
+                         aria-label="Views for each of the last seven days, peaking at @maxDay views">
+                        @foreach (var d in Model.ViewsByDay)
+                        {
+                            var pct = (int)Math.Round(100.0 * d.Count / maxDay);
+                            <div class="fhp-plot__col" title="@d.Count.ToString("N0") views on @d.Day.ToString("ddd d MMM")">
+                                <span class="fhp-plot__val">@d.Count.ToString("N0")</span>
+                                <div class="fhp-plot__track">
+                                    <div class="fhp-plot__bar" style="height:@pct%"></div>
+                                </div>
+                                <span class="fhp-plot__day">@d.Day.ToString("ddd")</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        @* ---- content per category ---- *@
+        <section class="fhp-panel">
+            <header class="fhp-panel__head">
+                <h2 class="fhp-panel__title">
+                    <i class="ri-bar-chart-2-line" aria-hidden="true"></i>
+                    Content per category
+                </h2>
+                <span class="fhp-panel__hint">@Model.ContentsByCategory.Count categories</span>
+            </header>
+            <div class="fhp-panel__body">
                 @if (Model.ContentsByCategory.Count == 0)
                 {
-                    <div class="empty-state py-3">No categories yet.</div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-3">
-    @* ---------------- Top content ---------------- *@
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Top content by views</h2>
-                <table class="table table-sm align-middle mb-0">
-                    <thead><tr><th>Title</th><th>Category</th><th class="text-end">Views</th></tr></thead>
-                    <tbody>
-                        @foreach (var c in Model.TopContents)
-                        {
-                            <tr>
-                                <td>@c.Title</td>
-                                <td><span class="badge bg-secondary rounded-pill">@c.Category.Name</span></td>
-                                <td class="text-end">@c.ViewCount</td>
-                            </tr>
-                        }
-                        @if (Model.TopContents.Count == 0)
-                        {
-                            <tr><td colspan="3" class="text-center text-muted">No data yet.</td></tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    @* ---------------- Recent activity ---------------- *@
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Latest feedback</h2>
-                @foreach (var f in Model.RecentFeedback)
-                {
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span>@f.Type — @(f.User?.Name ?? "visitor")</span>
-                        <span class="badge bg-@(f.Status == FeedbackStatus.Open ? "warning text-dark" : f.Status == FeedbackStatus.InProgress ? "info" : "success")">@f.Status</span>
+                    <div class="fhp-cine-empty">
+                        <i class="ri-price-tag-3-line" aria-hidden="true"></i>
+                        <span>No categories yet.</span>
                     </div>
                 }
+                else
+                {
+                    <div class="fhp-bars">
+                        @foreach (var c in Model.ContentsByCategory)
+                        {
+                            var pct = (int)Math.Round(100.0 * c.Count / maxCat);
+                            <div class="fhp-bars__row">
+                                <span class="fhp-bars__name" title="@c.Name">@c.Name</span>
+                                <span class="fhp-bars__count">@c.Count</span>
+                                <span class="fhp-bars__track">
+                                    <span class="fhp-bars__fill" style="width:@pct%"></span>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+    </div>
+
+    @* ================= ACTIVITY FEEDS ================= *@
+    <div class="fhp-panel-grid fhp-panel-grid--3">
+
+        @* ---- latest feedback ---- *@
+        <section class="fhp-panel">
+            <header class="fhp-panel__head">
+                <h2 class="fhp-panel__title">
+                    <i class="ri-feedback-line" aria-hidden="true"></i>
+                    Latest feedback
+                </h2>
+                @if (Model.PendingFeedback > 0)
+                {
+                    <span class="fhp-pill fhp-pill--warn">@Model.PendingFeedback open</span>
+                }
+            </header>
+            <div class="fhp-panel__body">
                 @if (Model.RecentFeedback.Count == 0)
                 {
-                    <div class="small text-muted">No feedback yet.</div>
-                }
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Latest fan submissions</h2>
-                @foreach (var s in Model.RecentSubmissions)
-                {
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span>@s.Title — @(s.User?.Name ?? "?")</span>
-                        <span class="badge bg-@(s.Status == SubmissionStatus.Pending ? "warning text-dark" : s.Status == SubmissionStatus.Approved ? "success" : "danger")">@s.Status</span>
+                    <div class="fhp-cine-empty">
+                        <i class="ri-feedback-line" aria-hidden="true"></i>
+                        <span>No feedback yet.</span>
                     </div>
                 }
+                else
+                {
+                    <div class="fhp-feed">
+                        @foreach (var f in Model.RecentFeedback)
+                        {
+                            var who = string.IsNullOrWhiteSpace(f.User?.Name) ? "Visitor" : f.User!.Name;
+                            var fPill = f.Status == FeedbackStatus.Open ? "warn"
+                                      : f.Status == FeedbackStatus.InProgress ? "info" : "ok";
+                            <div class="fhp-feed__row">
+                                <div class="fhp-feed__who">
+                                    <span class="fhp-feed__initial">@(who.Substring(0, 1).ToUpperInvariant())</span>
+                                    <div class="fhp-feed__main">
+                                        <div class="fhp-feed__name" title="@who">@who</div>
+                                        <div class="fhp-feed__sub">@f.Type · @f.CreatedAt.ToString("d MMM")</div>
+                                    </div>
+                                </div>
+                                <span class="fhp-pill fhp-pill--@fPill">@f.Status</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        @* ---- latest fan submissions ---- *@
+        <section class="fhp-panel">
+            <header class="fhp-panel__head">
+                <h2 class="fhp-panel__title">
+                    <i class="ri-image-2-line" aria-hidden="true"></i>
+                    Fan submissions
+                </h2>
+                @if (Model.PendingSubmissions > 0)
+                {
+                    <span class="fhp-pill fhp-pill--warn">@Model.PendingSubmissions pending</span>
+                }
+            </header>
+            <div class="fhp-panel__body">
                 @if (Model.RecentSubmissions.Count == 0)
                 {
-                    <div class="small text-muted">No submissions yet.</div>
-                }
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <h2 class="h6 section-title mb-3">Newest members</h2>
-                @foreach (var u in Model.RecentUsers)
-                {
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span>@u.Name <span class="text-muted">(@u.Email)</span></span>
-                        <span class="text-muted">@u.CreatedAt.ToString("MMM d")</span>
+                    <div class="fhp-cine-empty">
+                        <i class="ri-image-2-line" aria-hidden="true"></i>
+                        <span>No submissions yet.</span>
                     </div>
                 }
-                @if (Model.RecentUsers.Count == 0)
+                else
                 {
-                    <div class="small text-muted">No users yet.</div>
+                    <div class="fhp-feed">
+                        @foreach (var s in Model.RecentSubmissions)
+                        {
+                            var who = string.IsNullOrWhiteSpace(s.User?.Name) ? "Unknown" : s.User!.Name;
+                            var sPill = s.Status == SubmissionStatus.Pending ? "warn"
+                                      : s.Status == SubmissionStatus.Approved ? "ok" : "bad";
+                            <div class="fhp-feed__row">
+                                <div class="fhp-feed__who">
+                                    <span class="fhp-feed__initial">@(who.Substring(0, 1).ToUpperInvariant())</span>
+                                    <div class="fhp-feed__main">
+                                        <div class="fhp-feed__name" title="@s.Title">@s.Title</div>
+                                        <div class="fhp-feed__sub">@who · @s.CreatedAt.ToString("d MMM")</div>
+                                    </div>
+                                </div>
+                                <span class="fhp-pill fhp-pill--@sPill">@s.Status</span>
+                            </div>
+                        }
+                    </div>
                 }
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
+        @* ---- newest members ---- *@
+        <section class="fhp-panel">
+            <header class="fhp-panel__head">
+                <h2 class="fhp-panel__title">
+                    <i class="ri-user-add-line" aria-hidden="true"></i>
+                    Newest members
+                </h2>
+                <span class="fhp-panel__hint">@Model.NewUsersThisMonth this month</span>
+            </header>
+            <div class="fhp-panel__body">
+                @if (Model.RecentUsers.Count == 0)
+                {
+                    <div class="fhp-cine-empty">
+                        <i class="ri-user-add-line" aria-hidden="true"></i>
+                        <span>No members yet.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="fhp-feed">
+                        @foreach (var u in Model.RecentUsers)
+                        {
+                            var who = string.IsNullOrWhiteSpace(u.Name) ? "Member" : u.Name;
+                            <div class="fhp-feed__row">
+                                <div class="fhp-feed__who">
+                                    <span class="fhp-feed__initial">@(who.Substring(0, 1).ToUpperInvariant())</span>
+                                    <div class="fhp-feed__main">
+                                        <div class="fhp-feed__name" title="@who">@who</div>
+                                        <div class="fhp-feed__sub">@(u.Email ?? "no email on file")</div>
+                                    </div>
+                                </div>
+                                <span class="fhp-feed__time">@u.CreatedAt.ToString("d MMM")</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+    </div>
+
+    @* ================= TOP CONTENT ================= *@
+    <section class="fhp-panel">
+        <header class="fhp-panel__head">
+            <h2 class="fhp-panel__title">
+                <i class="ri-trophy-line" aria-hidden="true"></i>
+                Top content by views
+            </h2>
+            <span class="fhp-panel__hint">Top @Model.TopContents.Count</span>
+        </header>
+        <div class="fhp-panel__body">
+            @if (Model.TopContents.Count == 0)
+            {
+                <div class="fhp-cine-empty">
+                    <i class="ri-medal-line" aria-hidden="true"></i>
+                    <span>No data yet — nothing has been viewed so far.</span>
+                </div>
+            }
+            else
+            {
+                <div class="fhp-table-wrap">
+                    <table class="fhp-table">
+                        <thead>
+                            <tr>
+                                <th class="fhp-table__idx">#</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th class="fhp-table__num">Views</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ var rank = 0; }
+                            @foreach (var c in Model.TopContents)
+                            {
+                                rank++;
+                                <tr>
+                                    <td><span class="fhp-table__rank">@rank</span></td>
+                                    <td><span class="fhp-table__title">@c.Title</span></td>
+                                    <td><span class="fhp-pill fhp-pill--neutral">@c.Category.Name</span></td>
+                                    <td class="fhp-table__num">@c.ViewCount.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </section>
+
+</div>

@@ -12,6 +12,11 @@
         ? (Model.ViewCount / 1000d).ToString("0.#") + "k"
         : Model.ViewCount.ToString();
     var dark = (bool?)ViewData["fhpDark"] == true;
+
+    // When the page loaded this item's media rows the play button can start the
+    // video right here; otherwise it simply opens the detail page, where the
+    // full player lives.
+    var trailer = MediaUrl.Primary(Model.MediaItems);
 }
 <article class="fhp-vcard @(dark ? "fhp-vcard--dark" : "")">
     <div class="fhp-vcard__frame">
@@ -33,10 +38,22 @@
             </button>
         </div>
 
-        <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId"
-           class="fhp-vcard__play" aria-label="Open @Model.Title">
-            <i class="ri-play-fill" aria-hidden="true"></i>
-        </a>
+        @if (trailer is not null)
+        {
+            <button type="button" class="fhp-vcard__play fhp-vcard__play--inline" data-fhp-video
+                    data-kind="@MediaUrl.Kind(trailer.EmbedUrl)" data-src="@trailer.EmbedUrl"
+                    data-poster="@cover" data-title="@($"{Model.Title} — {trailer.Tag ?? "trailer"}")"
+                    aria-label="Play the @(trailer.Tag ?? "trailer") of @Model.Title here">
+                <i class="ri-play-fill" aria-hidden="true"></i>
+            </button>
+        }
+        else
+        {
+            <a asp-controller="Explore" asp-action="Details" asp-route-id="@Model.ContentId"
+               class="fhp-vcard__play" aria-label="Open @Model.Title">
+                <i class="ri-play-fill" aria-hidden="true"></i>
+            </a>
+        }
         <span class="fhp-vcard__badge">@views views</span>
     </div>
 

@@ -250,6 +250,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_MediaPlayer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9NZWRpYVBsYXllci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_MerchCard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9NZXJjaENhcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -262,8 +266,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9QYWdlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_TrailerCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9UcmFpbGVyQ2FyZC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[F:/.net/FanHubPlus/FanHubPlus/Views/Shared/_VideoModal.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WaWRlb01vZGFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [F:/.net/FanHubPlus/FanHubPlus/Views/Sitemap/Index.cshtml]

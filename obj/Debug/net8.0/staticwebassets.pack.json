@@ -481,10 +481,6 @@
       "PackagePath": "staticwebassets\\assets\\images\\monitor.png"
     },
     {
-      "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\images\\movie.mp4",
-      "PackagePath": "staticwebassets\\assets\\images\\movie.mp4"
-    },
-    {
       "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\images\\movies\\movie1.jpg",
       "PackagePath": "staticwebassets\\assets\\images\\movies\\movie1.jpg"
     },
@@ -1015,6 +1011,10 @@
     {
       "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\js\\ukiyo.min.js",
       "PackagePath": "staticwebassets\\assets\\js\\ukiyo.min.js"
+    },
+    {
+      "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\assets\\videos\\movie.mp4",
+      "PackagePath": "staticwebassets\\assets\\videos\\movie.mp4"
     },
     {
       "Id": "F:\\.net\\FanHubPlus\\FanHubPlus\\wwwroot\\css\\site.css",

@@ -733,7 +733,7 @@ html.dark-mode .hero { background: var(--fhp-hero); }
     position: relative;
     padding: 130px 0 60px;
     border-radius: 0 0 var(--fhp-r-md) var(--fhp-r-md);
-    background: #111 url('/assets/images/bg-images/bg-image7.jpg') center / cover no-repeat;
+    background: #111;
     text-align: center;
 }
 @media (min-width: 768px) { .fhp-banner { padding: 140px 0 80px; } }
